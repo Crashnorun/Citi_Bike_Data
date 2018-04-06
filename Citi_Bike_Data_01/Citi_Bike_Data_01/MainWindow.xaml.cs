@@ -20,14 +20,11 @@ using System.Windows.Shapes;
 namespace ToDo
 {
     /*
-     * Check for new data when app launches
-     *  show text info at the bottom of dialog
-     *  go to amazon site and check the number of files against the number of entries in the database
-     *  if new files need to be downloaded propt user, if no new files show updated sign
+     * *  if new files need to be downloaded propt user, if no new files show updated sign
      * Get the data from amazon site
      *  download to local folder
-     *-> Clean data
      *  unzip files and check for missing data
+     *-> Clean data
      *  report missing data to a dialog
      * Store data in a Mongo DB  
      */
@@ -52,7 +49,6 @@ namespace Notes
      * 
      */
 }
-
 
 
 namespace Citi_Bike_Data_01
@@ -129,25 +125,10 @@ namespace Citi_Bike_Data_01
 
             this.StatusText.Content = "";
 
-            this.StatusText.Content = "Retrieving table names";                                 // set UI text
-            fileNamesLocal = cls_DataBase_Helper.GetTableNames(this, connectionString);         // get list of DB table names
-            //fileNamesLocal = cls_DataBase_Helper.GetTableNames(connectionString, this);
-
-            this.StatusText.Content = "Retrieving Citi Bike data set names";                    // set UI text
-            fileNamesWeb = cls_Web_Helper.GetListOfFileNames(XMLWebAddress);                    // get the number of files on amazon
-
-            this.StatusText.Content = "Comparing data sets names";                              // set UI text
-            fileNamesNew = cls_Helper.CompareFileNames(fileNamesLocal, fileNamesWeb);           // compare files and download new ones
-
-            if (fileNamesNew.Count > 0)
-            {
-                cls_Helper.DownloadFiles(fileNamesNew, XMLWebAddress);                          // download unique files from amazon
-            }
-
             //fileNamesLocal.AddRange(Directory.GetFiles(destinationFolder));                     // get the files in the local folder
 
-            cls_Sync_Data.DestinationFolder = destinationFolder;
-            cls_Helper.DownloadFiles(FileNamesNew, XMLWebAddress);
+            //cls_Sync_Data.DestinationFolder = destinationFolder;
+            //cls_Helper.DownloadFiles(FileNamesNew, XMLWebAddress);
             //cls_Helper.AddFileNamesToTable(fileNamesWeb);
         }
 
@@ -204,6 +185,31 @@ namespace Citi_Bike_Data_01
                     } while (request != null);
                 }*/
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.StatusText.Content = "Retrieving table names";                                 // set UI text
+            fileNamesLocal = cls_DataBase_Helper.GetTableNames(this, connectionString);         // get list of DB table names
+            //fileNamesLocal = cls_DataBase_Helper.GetTableNames(connectionString, this);
+
+            this.StatusText.Content = "Retrieving Citi Bike data set names";                    // set UI text
+            fileNamesWeb = cls_Web_Helper.GetListOfFileNames(XMLWebAddress);                    // get the number of files on amazon
+
+            this.StatusText.Content = "Comparing data sets names";                              // set UI text
+            fileNamesNew = cls_Helper.CompareFileNames(fileNamesLocal, fileNamesWeb);           // compare files and download new ones
+
+            if (fileNamesNew.Count > 0)
+            {
+                cls_Helper.DownloadFiles(fileNamesNew, XMLWebAddress);                          // download unique files from amazon
+                // save file to temporary locaiton
+                // unzip folder
+                // for each csv file, load into database
+                // mark dates that were holidays
+                // earlier zip files contained multipl csv files, NEED TO SEE HOW THIS EFFECTS THE TABLE NAMES
+                // delete zip and csv file
+            }
+        }
+
 
     }               // close class
 }                   // close namespace
