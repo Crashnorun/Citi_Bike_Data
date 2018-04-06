@@ -17,10 +17,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 
-using Amazon.S3.Model;
-using Amazon.S3;
-using Amazon.S3.IO;
-
 namespace ToDo
 {
     /*
@@ -140,17 +136,16 @@ namespace Citi_Bike_Data_01
             fileNamesWeb = cls_Web_Helper.GetListOfFileNames(XMLWebAddress);                    // get the number of files on amazon
             this.StatusText.Content = "";
 
-            string AssemblyFolderPath = cls_Sync_Data.GetExecutingAssemblyPath();               // get assembly folder path
-            destinationFolder = cls_Sync_Data.GetDataFolder(AssemblyFolderPath);                // get folder path where data will be stored
-            //fileNamesLocal.AddRange(Directory.GetFiles(destinationFolder));                     // get the files in the local folder
-            
-            cls_Sync_Data.DestinationFolder = destinationFolder;
-            fileNamesNew = cls_Sync_Data.CompareFileNames(FileNamesLocal, XMLWebAddress);       // compare files and download new ones
+            cls_Helper.DownloadFiles(fileNamesWeb, XMLWebAddress);                              // download unique files from amazon
 
-            cls_Helper.AddFileNamesToTable(fileNamesWeb);
-            // if new files are downloaded, unzip them
-            // get all new files and check / clean data
-            // put data into DB
+            //fileNamesLocal.AddRange(Directory.GetFiles(destinationFolder));                     // get the files in the local folder
+
+            cls_Sync_Data.DestinationFolder = destinationFolder;
+            fileNamesNew = cls_Helper.CompareFileNames(fileNamesLocal, fileNamesWeb);       // compare files and download new ones
+
+            cls_Helper.DownloadFiles(FileNamesNew, XMLWebAddress);
+
+            //cls_Helper.AddFileNamesToTable(fileNamesWeb);
         }
 
         // download the citi bike data files
@@ -168,7 +163,7 @@ namespace Citi_Bike_Data_01
         {
 
             string BucketName = WebAddress;
-            AmazonS3Client s3Client = new AmazonS3Client(awsAccessKeyId, aswSecretAccessKey, Amazon.RegionEndpoint.USEast1);
+            //AmazonS3Client s3Client = new AmazonS3Client(awsAccessKeyId, aswSecretAccessKey, Amazon.RegionEndpoint.USEast1);
             //S3DirectoryInfo dir = new S3DirectoryInfo(s3Client, "doc/2006-03-01/");
             //S3DirectoryInfo dir = new S3DirectoryInfo(s3Client, "tripdata/");
             //bool exists = dir.Exists;

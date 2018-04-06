@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using Citi_Bike_Data_01.Classes;
 
+
 namespace Citi_Bike_Data_01
 {
     public class cls_Helper
@@ -74,91 +75,74 @@ namespace Citi_Bike_Data_01
         }
         //-----------------------------------------------------------------------
 
-        /*
-         * download files
-         * unzip files
-         * save file names to data base
-         */
 
         /// <summary>
-        /// 
+        /// get the unique names, and download new files
         /// </summary>
-        /// <reference>Does table exist:https://stackoverflow.com/questions/2923452/c-sharp-sql-create-table-if-it-doesnt-already-exist </reference>
-        /// <reference>Create connection to database: https://stackoverflow.com/questions/12220865/connecting-to-local-sql-server-database-using-c-sharp </reference>
-        /// <reference>https://stackoverflow.com/questions/6671067/retrieve-list-of-tables-from-specific-database-on-server-c-sharp</reference>
-        /// <returns></returns>
-        public static bool AddFileNamesToTable(List<string> FileNames)
+        /// <param name="FileNamesWeb">List of file names listed on the amazon website</param>
+        /// <param name="FileNamesLocal">List of files names stored locally</param>
+        /// <param name="XMLWebAddress">The URL where the XML data can be downloaded</param>
+        /// <returns>A list of unique file names. If list is lenth=0, then no new file names</returns>
+        public static List<string> CompareFileNames(List<string> FileNamesLocal, List<string> FileNamesWeb)
         {
-            string tableName = "FileNames";
-            SqlConnection connection = new SqlConnection(@"Data Source = (LocalDB)\MSSQLLocalDB;" +
-                @"AttachDbFilename = E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\Citi_Bike_Data_01.mdf;" +
-                "Integrated Security = True");
-            
-            connection.Open();
+            List<string> FileNames = new List<string>();
+            List<string> UniqueFileNames = new List<string>();
 
-            //DataTable schema = connection.GetSchema("Tables");
-            //List<string> TableNames = new List<string>();
-            //foreach (DataRow row in schema.Rows)
-            //{
-            //    TableNames.Add(row[2].ToString());
-            //}
-
-            int count = 2;
-            foreach (string fileName in FileNames)
+            foreach (string name in FileNamesWeb)                                               // go through all the file names listed in the xml on the web
             {
-                SqlCommand cmd = new SqlCommand();
-                cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "INSERT " + tableName + 
-                    " (FileName, TableNumber)" +
-                    " VALUES ('" + fileName + "', " + count + ")";
-                cmd.Connection = connection;
-                cmd.ExecuteNonQuery();
-                count++;
+                string tempName = FileNamesLocal.FirstOrDefault(x => x.ToUpper().Contains(name.ToUpper()));     // compare for unique file names
+                if (string.IsNullOrEmpty(tempName))
+                    UniqueFileNames.Add(name);                                                  // save unique names
             }
-            connection.Close();
+            return UniqueFileNames;                                                             // return the list of unique file names
+        }
+        //-----------------------------------------------------------------------
 
-           /* DataTable schema = connection.GetSchema("Tables");
-            List<string> TableNames = new List<string>();
-            foreach(DataRow row in schema.Rows)
-            {
-                TableNames.Add(row[2].ToString());
-            }*/
 
-/*            using (SqlCommand cmd = connection.CreateCommand())
+        /// <summary>
+        /// Download unique files from Amazon server
+        /// </summary>
+        /// <reverence>download file - https://msdn.microsoft.com/en-us/library/ez801hhe(v=vs.110).aspx</reverence>
+        /// <param name="UniqueFileNames">List of files names to be downloaded</param>
+        /// <param name="XMLWebAddress">The URL where the XML data can be downloaded</param>
+        public static void DownloadFiles(List<string> UniqueFileNames, string XMLWebAddress)
+        {
+            string webaddress, destinationFile;
+            string assemblyFolderPath = cls_Sync_Data.GetExecutingAssemblyPath();               // get assembly folder path
+            string destinationFolder = cls_Sync_Data.GetDataFolder(assemblyFolderPath);         // get folder path where data will be stored
+
+            using (WebClient client = new WebClient())
             {
-                DataTable schema = connection.GetSchema("Tables");
-                if (schema.Rows.Count == 0)
+                foreach (string uniqueName in UniqueFileNames)                                  // go through all the new file names
                 {
-                    DataColumn column;
-                    DataRow row;
-
-                    cls_File_Info fileinfo = new cls_File_Info("testFile", DateTime.Today);
-                    System.Reflection.PropertyInfo[] properties = typeof(cls_File_Info).GetProperties();            // get a list of properties in the class
-
-                    for (int i = 0; i < typeof(cls_File_Info).GetProperties().Count(); i++)                         // for each property add a column
-                    {
-                        column = new DataColumn();
-                        column.DataType = System.Type.GetType(properties[i].GetType().ToString());                  // specify column type
-                        column.ColumnName = properties[i].Name;                                                     // specify column name
-                        schema.Columns.Add(column);                                                                 // add column
-                    }
-
-                    row = schema.NewRow();                                                                          // create new row
-                    foreach (var prop in fileinfo.GetType().GetProperties())
-                    {
-                        row[prop.Name] = prop.GetValue(fileinfo);
-                        // row[i] = fileinfo..properties[i];
-
-                    }
-                    schema.Rows.Add(row);
+                    //https://s3.amazonaws.com/tripdata/201307-201402-citibike-tripdata.zip
+                    webaddress = XMLWebAddress + uniqueName;                                    // get the url of the new file name
+                    destinationFile = destinationFolder + @"\" + uniqueName;                    // create full file name path
+                    client.DownloadFile(webaddress, destinationFile);                           // download the file
+                    /* download files
+                    * unzip files
+                    * save file names to data base
+                    */
                 }
             }
-            */
-           // connection.Close();
-            return false;
         }
+        //-----------------------------------------------------------------------
 
-
+        /// <summary>
+        /// Get the executing assembly folder path. This path will be used to save the .zip files locally
+        /// </summary>
+        /// <returns>String - Return the folder path of the executing assembly</returns>
+        public static string GetExecutingAssemblyPath()
+        {
+            // find assembly directory
+            Assembly localAssembly = Assembly.GetExecutingAssembly();           // get the local assembly
+            string codeBase = localAssembly.CodeBase;                           // get the code base
+            UriBuilder uri = new UriBuilder(codeBase);                          // create new URI
+            string path = Uri.UnescapeDataString(uri.Path);                     // get path from URI
+            string folderPath = System.IO.Path.GetDirectoryName(path);          // get the folder path
+            return folderPath;
+        }
+        //-----------------------------------------------------------------------
     }
 
     public static class cls_Sync_Data
@@ -212,7 +196,7 @@ namespace Citi_Bike_Data_01
         public static List<string> GetListOfFileNames(string XMLWebAddress)
         {
             FileNamesWeb = new List<string>();
-            string xmlStr;   
+            string xmlStr;
 
             using (var wc = new WebClient())
             {
@@ -279,60 +263,5 @@ namespace Citi_Bike_Data_01
         }
         //-----------------------------------------------------------------------
 
-        /// <summary>
-        /// get the unique names, and download new files
-        /// </summary>
-        /// <param name="FileNamesWeb">List of file names listed on the amazon website</param>
-        /// <param name="FileNamesLocal">List of files names stored locally</param>
-        /// <param name="XMLWebAddress">The URL where the XML data can be downloaded</param>
-        /// <returns>A list of unique file names. If list is lenth=0, then no new file names</returns>
-        public static List<string> CompareFileNames(List<string> FileNamesLocal, string XMLWebAddress)
-        {
-            List<string> FileNames = new List<string>();
-            List<string> UniqueFileNames = new List<string>();
-
-            foreach (string name in FileNamesWeb)                                           // go through all the file names listed in the xml on the web
-            {
-                string tempName = FileNamesLocal.FirstOrDefault(x => x.Contains(name));     // compare for unique file names
-                if (string.IsNullOrEmpty(tempName))
-                {
-                    UniqueFileNames.Add(name);                                              // save unique names
-                }
-                else
-                {
-                    string fName = System.IO.Path.GetFileName(tempName);
-                    FileNames.Add(fName);
-                }
-            }
-
-            FileNamesWeb = UniqueFileNames;
-            if (UniqueFileNames.Count > 0)
-                DownloadFiles(UniqueFileNames, XMLWebAddress);                              // download unique names
-            return UniqueFileNames;                                                         // return the list of unique file names
-        }
-        //-----------------------------------------------------------------------
-
-        /// <summary>
-        /// Download unique files from Amazon server
-        /// </summary>
-        /// <reverence>download file - https://msdn.microsoft.com/en-us/library/ez801hhe(v=vs.110).aspx</reverence>
-        /// <param name="UniqueFileNames">List of files names to be downloaded</param>
-        /// <param name="XMLWebAddress">The URL where the XML data can be downloaded</param>
-        private static void DownloadFiles(List<string> UniqueFileNames, string XMLWebAddress)
-        {
-            string webaddress, destinationFile;
-
-            using (var client = new WebClient())
-            {
-                foreach (string uniqueName in UniqueFileNames)                                  // go through all the new file names
-                {
-                    //https://s3.amazonaws.com/tripdata/201307-201402-citibike-tripdata.zip
-                    webaddress = XMLWebAddress + uniqueName;                                    // get the url of the new file name
-                    destinationFile = DestinationFolder + @"\" + uniqueName;                    // create full file name path
-                    client.DownloadFile(webaddress, destinationFile);                           // download the file
-                }
-            }
-        }
-        //-----------------------------------------------------------------------
     }
 }
