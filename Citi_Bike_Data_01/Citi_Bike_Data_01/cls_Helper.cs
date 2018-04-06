@@ -108,8 +108,8 @@ namespace Citi_Bike_Data_01
         public static void DownloadFiles(List<string> UniqueFileNames, string XMLWebAddress)
         {
             string webaddress, destinationFile;
-            string assemblyFolderPath = cls_Sync_Data.GetExecutingAssemblyPath();               // get assembly folder path
-            string destinationFolder = cls_Sync_Data.GetDataFolder(assemblyFolderPath);         // get folder path where data will be stored
+            string assemblyFolderPath = GetExecutingAssemblyPath();                             // get assembly folder path
+            string destinationFolder = GetDataFolder(assemblyFolderPath);                       // get folder path where data will be stored
 
             using (WebClient client = new WebClient())
             {
@@ -128,29 +128,6 @@ namespace Citi_Bike_Data_01
         }
         //-----------------------------------------------------------------------
 
-        /// <summary>
-        /// Get the executing assembly folder path. This path will be used to save the .zip files locally
-        /// </summary>
-        /// <returns>String - Return the folder path of the executing assembly</returns>
-        public static string GetExecutingAssemblyPath()
-        {
-            // find assembly directory
-            Assembly localAssembly = Assembly.GetExecutingAssembly();           // get the local assembly
-            string codeBase = localAssembly.CodeBase;                           // get the code base
-            UriBuilder uri = new UriBuilder(codeBase);                          // create new URI
-            string path = Uri.UnescapeDataString(uri.Path);                     // get path from URI
-            string folderPath = System.IO.Path.GetDirectoryName(path);          // get the folder path
-            return folderPath;
-        }
-        //-----------------------------------------------------------------------
-    }
-
-    public static class cls_Sync_Data
-    {
-        public static List<string> FileNamesWeb;
-        public static List<string> FileNamesLocal;
-        public static List<string> FileNamesNew;
-        public static string DestinationFolder;
 
         /// <summary>
         /// Get the executing assembly folder path. This path will be used to save the .zip files locally
@@ -167,6 +144,7 @@ namespace Citi_Bike_Data_01
             return folderPath;
         }
         //-----------------------------------------------------------------------
+
 
         /// <summary>
         /// Check if the data folder exists. Create it if it doesn't exist
@@ -183,12 +161,20 @@ namespace Citi_Bike_Data_01
             else                                                    // if the directory doesn't exist
             {
                 DirectoryInfo directoryInfo = Directory.CreateDirectory(FolderPath + dataFolder);       // create the directory
-                DestinationFolder = directoryInfo.FullName;         // get the directory name
-                return DestinationFolder;                           // return directory
+                return directoryInfo.FullName;         // return the directory name
             }
         }
         //-----------------------------------------------------------------------
+    }
 
+    public static class cls_Sync_Data
+    {
+        public static List<string> FileNamesWeb;
+        public static List<string> FileNamesLocal;
+        public static List<string> FileNamesNew;
+        public static string DestinationFolder;
+        
+        
         /// <summary>
         /// <reference>https://stackoverflow.com/questions/124492/c-sharp-httpwebrequest-command-to-get-directory-listing</reference>
         /// <reference>https://stackoverflow.com/questions/7496913/how-to-load-xml-from-url-on-xmldocument</reference>

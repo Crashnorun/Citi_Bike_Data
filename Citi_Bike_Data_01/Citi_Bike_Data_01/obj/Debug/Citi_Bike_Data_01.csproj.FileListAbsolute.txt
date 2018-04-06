@@ -28,12 +28,6 @@ E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\bin\Deb
 E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\bin\Debug\Citi_Bike_Data_01_log.ldf
 E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\bin\Debug\Citi_Bike_Data_01.exe
 E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\bin\Debug\Citi_Bike_Data_01.pdb
-E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\bin\Debug\AWSSDK.Core.dll
-E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\bin\Debug\AWSSDK.S3.dll
-E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\bin\Debug\AWSSDK.Core.pdb
-E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\bin\Debug\AWSSDK.Core.xml
-E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\bin\Debug\AWSSDK.S3.pdb
-E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\bin\Debug\AWSSDK.S3.xml
 E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\obj\Debug\Citi_Bike_Data_01.csprojResolveAssemblyReference.cache
 E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\obj\Debug\MainWindow.g.cs
 E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\obj\Debug\App.g.cs
@@ -45,4 +39,3 @@ E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\obj\Deb
 E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\obj\Debug\Citi_Bike_Data_01.Properties.Resources.resources
 E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\obj\Debug\Citi_Bike_Data_01.csproj.GenerateResource.Cache
 E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\obj\Debug\Citi_Bike_Data_01.csproj.CoreCompileInputs.cache
-E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\obj\Debug\Citi_Bike_Data_01.csproj.CopyComplete
