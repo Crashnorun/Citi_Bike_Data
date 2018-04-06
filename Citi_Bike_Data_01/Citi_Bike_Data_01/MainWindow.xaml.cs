@@ -132,19 +132,22 @@ namespace Citi_Bike_Data_01
             this.StatusText.Content = "Retrieving table names";                                 // set UI text
             fileNamesLocal = cls_DataBase_Helper.GetTableNames(this, connectionString);         // get list of DB table names
             //fileNamesLocal = cls_DataBase_Helper.GetTableNames(connectionString, this);
+
             this.StatusText.Content = "Retrieving Citi Bike data set names";                    // set UI text
             fileNamesWeb = cls_Web_Helper.GetListOfFileNames(XMLWebAddress);                    // get the number of files on amazon
-            this.StatusText.Content = "";
 
-            cls_Helper.DownloadFiles(fileNamesWeb, XMLWebAddress);                              // download unique files from amazon
+            this.StatusText.Content = "Comparing data sets names";                              // set UI text
+            fileNamesNew = cls_Helper.CompareFileNames(fileNamesLocal, fileNamesWeb);           // compare files and download new ones
+
+            if (fileNamesNew.Count > 0)
+            {
+                cls_Helper.DownloadFiles(fileNamesNew, XMLWebAddress);                          // download unique files from amazon
+            }
 
             //fileNamesLocal.AddRange(Directory.GetFiles(destinationFolder));                     // get the files in the local folder
 
             cls_Sync_Data.DestinationFolder = destinationFolder;
-            fileNamesNew = cls_Helper.CompareFileNames(fileNamesLocal, fileNamesWeb);       // compare files and download new ones
-
             cls_Helper.DownloadFiles(FileNamesNew, XMLWebAddress);
-
             //cls_Helper.AddFileNamesToTable(fileNamesWeb);
         }
 
