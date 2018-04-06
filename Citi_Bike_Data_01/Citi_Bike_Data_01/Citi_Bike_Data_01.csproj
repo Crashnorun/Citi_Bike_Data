@@ -90,6 +90,7 @@
     <Compile Include="Classes\cls_Station.cs" />
     <Compile Include="Classes\cls_Trip.cs" />
     <Compile Include="Classes\cls_User.cs" />
+    <Compile Include="cls_DataBase_Helper.cs" />
     <Compile Include="cls_Helper.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

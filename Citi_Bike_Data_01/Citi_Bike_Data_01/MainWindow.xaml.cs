@@ -24,8 +24,10 @@ using Amazon.S3.IO;
 namespace ToDo
 {
     /*
-     * Check for new data
-     *  go to amazon site and check the number of files against the number of local files
+     * Check for new data when app launches
+     *  show text info at the bottom of dialog
+     *  go to amazon site and check the number of files against the number of entries in the database
+     *  if new files need to be downloaded propt user, if no new files show updated sign
      * Get the data from amazon site
      *  download to local folder
      *-> Clean data
@@ -111,9 +113,17 @@ namespace Citi_Bike_Data_01
         private List<string> fileNamesLocal;
         private List<string> fileNamesNew;
         private string destinationFolder;
+        private string connectionString = @"Data Source = (LocalDB)\MSSQLLocalDB;" +
+                @"AttachDbFilename = E:\_My Stuff\Projects\Citi Bike Data\Citi_Bike_Data_01\Citi_Bike_Data_01\Citi_Bike_Data_01.mdf;" +
+                "Integrated Security = True";
         #endregion
 
-
+        /// <summary>
+        /// Check amazon site for new data sets
+        ///     compare database with amazon site
+        ///     download any necessry data and populate database
+        /// 
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -121,10 +131,19 @@ namespace Citi_Bike_Data_01
             fileNamesLocal = new List<string>();
             fileNamesNew = new List<string>();
 
+            this.StatusText.Content = "";
+
+            this.StatusText.Content = "Retrieving table names";                                 // set UI text
+            fileNamesLocal = cls_DataBase_Helper.GetTableNames(this, connectionString);         // get list of DB table names
+            //fileNamesLocal = cls_DataBase_Helper.GetTableNames(connectionString, this);
+            this.StatusText.Content = "Retrieving Citi Bike data set names";                    // set UI text
+            fileNamesWeb = cls_Web_Helper.GetListOfFileNames(XMLWebAddress);                    // get the number of files on amazon
+            this.StatusText.Content = "";
+
             string AssemblyFolderPath = cls_Sync_Data.GetExecutingAssemblyPath();               // get assembly folder path
             destinationFolder = cls_Sync_Data.GetDataFolder(AssemblyFolderPath);                // get folder path where data will be stored
             fileNamesLocal.AddRange(Directory.GetFiles(destinationFolder));                     // get the files in the local folder
-            fileNamesWeb = cls_Sync_Data.GetListOfFileNames(XMLWebAddress);                     // get the number of files on amazon
+            //fileNamesWeb = cls_Sync_Data.GetListOfFileNames(XMLWebAddress);                     
             cls_Sync_Data.DestinationFolder = destinationFolder;
             fileNamesNew = cls_Sync_Data.CompareFileNames(FileNamesLocal, XMLWebAddress);       // compare files and download new ones
 

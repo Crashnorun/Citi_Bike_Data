@@ -5,9 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Citi_Bike_Data_01"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        <Button x:Name="button" Content="Download Zip Files" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="118" Click="button_Click"/>
-
+        Title="Crashnorun" Height="350" Width="525" Background="#FFF1F1F1" BorderBrush="#FFC3C3C3" Foreground="#FF9AD3DE">
+    <Grid RenderTransformOrigin="0.499,0.479">
+        <Button x:Name="button" Content="Download Zip Files" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="118" Click="button_Click" Background="#FFE3E3E3" BorderBrush="#FF89BDD3"/>
+        <ProgressBar x:Name="ProgressBar" HorizontalAlignment="Left" Height="10" Margin="10,5,0,0" Grid.Row="1" VerticalAlignment="Top" Width="497" Foreground="#FF9AD3DE" BorderBrush="{x:Null}" Background="{x:Null}" IsEnabled="False"/>
+        <Label x:Name="StatusText" Content="Label" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="1" VerticalAlignment="Top" FontSize="8" Height="20" Width="88" Foreground="#FF686868"/>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
     </Grid>
 </Window>
