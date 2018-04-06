@@ -142,8 +142,8 @@ namespace Citi_Bike_Data_01
 
             string AssemblyFolderPath = cls_Sync_Data.GetExecutingAssemblyPath();               // get assembly folder path
             destinationFolder = cls_Sync_Data.GetDataFolder(AssemblyFolderPath);                // get folder path where data will be stored
-            fileNamesLocal.AddRange(Directory.GetFiles(destinationFolder));                     // get the files in the local folder
-            //fileNamesWeb = cls_Sync_Data.GetListOfFileNames(XMLWebAddress);                     
+            //fileNamesLocal.AddRange(Directory.GetFiles(destinationFolder));                     // get the files in the local folder
+            
             cls_Sync_Data.DestinationFolder = destinationFolder;
             fileNamesNew = cls_Sync_Data.CompareFileNames(FileNamesLocal, XMLWebAddress);       // compare files and download new ones
 

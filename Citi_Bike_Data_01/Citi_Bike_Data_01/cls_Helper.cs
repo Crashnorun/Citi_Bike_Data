@@ -75,11 +75,9 @@ namespace Citi_Bike_Data_01
         //-----------------------------------------------------------------------
 
         /*
-         * add table for all the file names
          * download files
          * unzip files
          * save file names to data base
-         * 
          */
 
         /// <summary>
