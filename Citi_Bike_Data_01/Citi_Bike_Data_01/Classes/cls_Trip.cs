@@ -9,18 +9,27 @@ namespace Citi_Bike_Data_01.Classes
     public class cls_Trip
     {
         #region PROPERTIES
+        /// <summary>
+        /// Duration calculated in SECONDS
+        /// </summary>
         public int TripDuration
         {
             get { return tripDuration; }
             set { tripDuration = value; }
         }
 
+        /// <summary>
+        /// Format mm/dd/year 24hr:min
+        /// </summary>
         public DateTime StartTime
         {
             get { return startTime; }
             set { startTime = value; }
         }
 
+        /// <summary>
+        /// Format mm/dd/year 24hr:min
+        /// </summary>
         public DateTime StopTime
         {
             get { return stopTime; }
@@ -65,25 +74,7 @@ namespace Citi_Bike_Data_01.Classes
 
         public cls_Trip()
         {
-
         }
-
     }
-
-    /// <summary>
-    /// NEED TO CONFIRM THE GENDER VARIABLES
-    /// </summary>
-    public enum gender
-    {
-        Unknown = 0,        // unknown is confirmed
-        Male = 1,
-        Female = 2
-    }
-
-    public enum userType
-    {
-        Unknown = 0,
-        Customer = 1,
-        Subscriber = 2
-    }
+   
 }

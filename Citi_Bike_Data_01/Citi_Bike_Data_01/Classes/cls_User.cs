@@ -9,13 +9,13 @@ namespace Citi_Bike_Data_01.Classes
     public class cls_User
     {
         #region PROPERTIES
-        public userType UserType
+        public UserType UserType
         {
             get { return userType; }
             set { userType = value; }
         }
 
-        public gender GenderType
+        public Gender GenderType
         {
             get { return genderType; }
             set { genderType = value; }
@@ -27,16 +27,16 @@ namespace Citi_Bike_Data_01.Classes
             set { birthYear = value; }
         }
 
-        private gender genderType;
+        private Gender genderType;
         private string birthYear;
-        private userType userType;
+        private UserType userType;
         #endregion
 
         public cls_User()
         {
         }
 
-        public cls_User(gender genderType, string birthYear, userType userType)
+        public cls_User(Gender genderType, string birthYear, UserType userType)
         {
             this.genderType = genderType;
             this.birthYear = birthYear;

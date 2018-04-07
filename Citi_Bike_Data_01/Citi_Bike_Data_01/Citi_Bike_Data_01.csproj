@@ -81,9 +81,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Classes\cls_File_Info.cs" />
+    <Compile Include="Classes\cls_Gender.cs" />
     <Compile Include="Classes\cls_Station.cs" />
     <Compile Include="Classes\cls_Trip.cs" />
     <Compile Include="Classes\cls_User.cs" />
+    <Compile Include="Classes\cls_UserType.cs" />
     <Compile Include="cls_DataBase_Helper.cs" />
     <Compile Include="cls_Helper.cs" />
     <Compile Include="cls_Web_Helper.cs" />

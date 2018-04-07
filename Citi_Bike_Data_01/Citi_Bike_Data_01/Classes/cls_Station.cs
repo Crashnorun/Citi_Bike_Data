@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace Citi_Bike_Data_01.Classes
 {
+    /// <summary>
+    /// Contains station data
+    /// Station ID = Int
+    /// Statin Name = String
+    /// Station Latitude = Double
+    /// Station Longitude = Double
+    /// </summary>
     public class cls_Station
     {
         #region PROPERTIES
