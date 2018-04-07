@@ -110,6 +110,7 @@ namespace Citi_Bike_Data_01
                 "Integrated Security = True";
         #endregion
 
+
         /// <summary>
         /// Check amazon site for new data sets
         ///     compare database with amazon site
@@ -131,6 +132,7 @@ namespace Citi_Bike_Data_01
             //cls_Helper.DownloadFiles(FileNamesNew, XMLWebAddress);
             //cls_Helper.AddFileNamesToTable(fileNamesWeb);
         }
+
 
         // download the citi bike data files
         private void button_Click(object sender, RoutedEventArgs e)
@@ -185,6 +187,7 @@ namespace Citi_Bike_Data_01
                     } while (request != null);
                 }*/
         }
+
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {

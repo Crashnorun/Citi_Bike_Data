@@ -59,6 +59,15 @@ namespace Citi_Bike_Data_01.Classes
             get { return user; }
             set { user = value; }
         }
+       
+        /// <summary>
+        /// Identify if the trip was taking on a Holiday.
+        /// </summary>
+        public bool IsHoliday
+        {
+            get { return isHoliday; }
+            set { IsHoliday = value; }
+        }
         #endregion
 
         #region PRIVATE FIELDS
@@ -70,6 +79,7 @@ namespace Citi_Bike_Data_01.Classes
         private int bikeID;
         private cls_User user;
         private cls_File_Info fileInfo;
+        private bool isHoliday;
         #endregion
 
         public cls_Trip()
