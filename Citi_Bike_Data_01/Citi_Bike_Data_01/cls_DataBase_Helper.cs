@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data;
 using System.Diagnostics;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Citi_Bike_Data_01
 {
@@ -32,7 +33,7 @@ namespace Citi_Bike_Data_01
                     tableNames.Add(reader["FileName"].ToString());                              // read all the rows
                 }
                 connection.Close();                                                             // close connection
-            }   
+            }
             return tableNames;                                                                  // return list of names
         }
 
@@ -53,14 +54,14 @@ namespace Citi_Bike_Data_01
                 DataTable table = connection.GetSchema("Tables");                               // get the table
                 connection.Close();                                                             // close connection
 
-                foreach(DataRow r in table.Rows)
+                foreach (DataRow r in table.Rows)
                 {
                     tableNames.Add(r[2].ToString());                                            // save each table name
                 }
             }
             return tableNames;                                                                  // return list of names
         }
-        
+
 
         /// <summary>
         /// Adds the names of the new datasets to the first table in the DB
@@ -71,7 +72,7 @@ namespace Citi_Bike_Data_01
         public static void AddFileNamesToTable(string connectionString, List<string> FileNames)
         {
             string tableName = "FileNames";
-            
+
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 int count = 2;
@@ -90,5 +91,54 @@ namespace Citi_Bike_Data_01
             }
         }
 
-    }
-}
+
+        /// <summary>
+        /// This will take a csv file and covert it to a data table
+        /// </summary>
+        /// <reference> CSV to datatable = https://stackoverflow.com/questions/20759302/upload-csv-file-to-sql-server </reference>
+        /// <param name="csvFilePath"> Full file path where CSV file is located </param>
+        /// <returns> Returns a datatable from a CSV file </returns>
+        public static DataTable GetDataTableFromCSVFile(string csvFilePath)
+        {
+            string[] directoryPaths = csvFilePath.Split('/');                                   // get split the folder path
+            string fileName = directoryPaths[directoryPaths.Length - 1];                        // get the file name from the path
+            fileName = fileName.Split('.')[0];                                                  // remove the file extension ".zip"
+
+            DataTable csvData = new DataTable(fileName);                                        // create new data table with table name = file name
+            try
+            {
+                using (TextFieldParser csvReader = new TextFieldParser(csvFilePath))
+                {
+                    csvReader.SetDelimiters(new string[] { "," });                              // set delimiter
+                    csvReader.HasFieldsEnclosedInQuotes = false;                                // entries do not have quotes
+                    string[] colFields = csvReader.ReadFields();
+                    foreach (string column in colFields)
+                    {
+                        // NEED TO MAKE SURE THE ENTRIES GO IN THE RIGHT COLUMN
+                        // COLUMN HEADERS?
+                        DataColumn dataColumn = new DataColumn(column);
+                        dataColumn.AllowDBNull = true;
+                        csvData.Columns.Add(dataColumn);
+                    }
+
+                    while (!csvReader.EndOfData)
+                    {
+                        string[] fieldData = csvReader.ReadFields();
+                        for(int i = 0; i < fieldData.Length; i++)
+                        {
+                            if (fieldData[i] == "")
+                                fieldData[i] = null;
+                        }
+                        csvData.Rows.Add(fieldData);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            return csvData;
+        }
+
+    }       // close class
+}           // close namespace

@@ -3,10 +3,12 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Reflection;                // used to create directory
 using System.IO;                        // used to create directory
+using System.IO.Compression;            // used for unzipping files
 using System.Xml;                       // used to extract xml data
 using System.Net;                       // used to download zip files
 using System.Collections.Generic;
 using System.Linq;
+
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
@@ -102,7 +104,8 @@ namespace Citi_Bike_Data_01
         /// <summary>
         /// Download unique files from Amazon server
         /// </summary>
-        /// <reverence>download file - https://msdn.microsoft.com/en-us/library/ez801hhe(v=vs.110).aspx</reverence>
+        /// <reverence>download file - https://msdn.microsoft.com/en-us/library/ez801hhe(v=vs.110).aspx </reverence>
+        /// <reference> unzip file - https://stackoverflow.com/questions/22604941/how-can-i-unzip-a-file-to-a-net-memory-stream </reference>
         /// <param name="UniqueFileNames">List of files names to be downloaded</param>
         /// <param name="XMLWebAddress">The URL where the XML data can be downloaded</param>
         public static void DownloadFiles(List<string> UniqueFileNames, string XMLWebAddress)
@@ -118,8 +121,24 @@ namespace Citi_Bike_Data_01
                     //https://s3.amazonaws.com/tripdata/201307-201402-citibike-tripdata.zip
                     webaddress = XMLWebAddress + uniqueName;                                    // get the url of the new file name
                     destinationFile = destinationFolder + @"\" + uniqueName;                    // create full file name path
+                    //string tempFolderPath = Path.GetTempPath();                               // temporary folder path
                     client.DownloadFile(webaddress, destinationFile);                           // download the file
-                    /* download files
+                    using (FileStream fileStream = File.OpenRead(destinationFile))              // stream zip file
+                    {
+                        using (ZipArchive unzippedFile = new ZipArchive(fileStream, ZipArchiveMode.Read))  // unzip files
+                        {
+                            foreach (ZipArchiveEntry entry in unzippedFile.Entries)             // go through each of the files in the zip file
+                            {
+                                using (Stream stram = entry.Open())                             // open the csv file
+                                {
+
+                                }
+                            }
+                        }
+                    }
+
+
+                    /* 
                     * unzip files
                     * save file names to data base
                     */
@@ -173,8 +192,8 @@ namespace Citi_Bike_Data_01
         public static List<string> FileNamesLocal;
         public static List<string> FileNamesNew;
         public static string DestinationFolder;
-        
-        
+
+
         /// <summary>
         /// <reference>https://stackoverflow.com/questions/124492/c-sharp-httpwebrequest-command-to-get-directory-listing</reference>
         /// <reference>https://stackoverflow.com/questions/7496913/how-to-load-xml-from-url-on-xmldocument</reference>
