@@ -194,9 +194,19 @@ namespace Citi_Bike_Data_01
             this.StatusText.Content = "Retrieving table names";                                 // set UI text
             fileNamesLocal = cls_DataBase_Helper.GetTableNames(this, connectionString);         // get list of DB table names
             //fileNamesLocal = cls_DataBase_Helper.GetTableNames(connectionString, this);
-
+            if (fileNamesLocal.Count <= 0)
+            {
+                Debug.Print("File names in DB <= 0");
+                return;
+            }
+                
             this.StatusText.Content = "Retrieving Citi Bike data set names";                    // set UI text
             fileNamesWeb = cls_Web_Helper.GetListOfFileNames(XMLWebAddress);                    // get the number of files on amazon
+            if (fileNamesWeb.Count <= 0)
+            {
+                Debug.Print("File names on Amazon <= 0");
+                return;
+            }
 
             this.StatusText.Content = "Comparing data sets names";                              // set UI text
             fileNamesNew = cls_Helper.CompareFileNames(fileNamesLocal, fileNamesWeb);           // compare files and download new ones

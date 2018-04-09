@@ -5,15 +5,12 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Windows.Forms;
 
 namespace Citi_Bike_Data_01
 {
     public class cls_Web_Helper
     {
-        public static List<string> FileNamesLocal;
-        public static List<string> FileNamesNew;
-        public static string DestinationFolder;
-
         /// <summary>
         /// Retrieves the list of available citi bike datasets on the amazon s3 bucket
         /// <reference>https://stackoverflow.com/questions/124492/c-sharp-httpwebrequest-command-to-get-directory-listing</reference>
@@ -26,20 +23,28 @@ namespace Citi_Bike_Data_01
             List<string> fileNamesWeb = new List<string>();                                     // will hold all the file names from the amazon site
             string xmlStr;
 
-            using (WebClient wc = new WebClient())
+            try
             {
-                xmlStr = wc.DownloadString(XMLWebAddress);                                      // get the xml from the website
+                using (WebClient wc = new WebClient())
+                {
+                    xmlStr = wc.DownloadString(XMLWebAddress);                                      // get the xml from the website
+                }
+                XmlDocument doc = new XmlDocument();                                                // create new xml document
+                doc.LoadXml(xmlStr);                                                                // load string into document
+
+                XmlNodeList nodeList = doc.GetElementsByTagName("Key");                             // search document for KEY
+
+                foreach (XmlNode node in nodeList)                                                  // go through each node
+                {
+                    if (node.InnerXml.Contains(".zip"))                                             // if the name contains a .zip
+                        fileNamesWeb.Add(node.InnerXml);                                            // save file name
+                }
             }
-            XmlDocument doc = new XmlDocument();                                                // create new xml document
-            doc.LoadXml(xmlStr);                                                                // load string into document
-
-            XmlNodeList nodeList = doc.GetElementsByTagName("Key");                             // search document for KEY
-
-            foreach (XmlNode node in nodeList)                                                  // go through each node
+            catch (Exception ex)
             {
-                if (node.InnerXml.Contains(".zip"))                                             // if the name contains a .zip
-                    fileNamesWeb.Add(node.InnerXml);                                            // save file name
+                MessageBox.Show("Could not get list of names from Amazon" + Environment.NewLine + ex.Message.ToString());
             }
+
             // create a txt
             #region OPTION 02
             /* XmlTextReader reader = new XmlTextReader(XMLWebAddress);            //https://support.microsoft.com/en-us/help/307643/how-to-read-xml-data-from-a-url-by-using-visual-c

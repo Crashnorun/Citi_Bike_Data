@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Diagnostics;
 using Microsoft.VisualBasic.FileIO;
+using System.Windows.Forms;                                                                     // used for displaying exceptions
 
 namespace Citi_Bike_Data_01
 {
@@ -21,18 +22,24 @@ namespace Citi_Bike_Data_01
         public static List<string> GetTableNames(MainWindow window, string connectionString)
         {
             List<string> tableNames = new List<string>();                                       // empty list for the names
-
-            using (SqlConnection connection = new SqlConnection(connectionString))              // create connection to DB
+            try
             {
-                string SqlQuery = "SELECT FileName FROM FileNames";                             // DB query
-                SqlCommand cmd = new SqlCommand(SqlQuery, connection);                          // create command
-                connection.Open();                                                              // open connection to DB
-                SqlDataReader reader = cmd.ExecuteReader();                                     // execute read command
-                while (reader.Read())
+                using (SqlConnection connection = new SqlConnection(connectionString))          // create connection to DB
                 {
-                    tableNames.Add(reader["FileName"].ToString());                              // read all the rows
+                    string SqlQuery = "SELECT FileName FROM FileNames";                         // DB query
+                    SqlCommand cmd = new SqlCommand(SqlQuery, connection);                      // create command
+                    connection.Open();                                                          // open connection to DB
+                    SqlDataReader reader = cmd.ExecuteReader();                                 // execute read command
+                    while (reader.Read())
+                    {
+                        tableNames.Add(reader["FileName"].ToString());                          // read all the rows
+                    }
+                    connection.Close();                                                         // close connection
                 }
-                connection.Close();                                                             // close connection
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not get table names from DB" + Environment.NewLine + ex.Message.ToString());
             }
             return tableNames;                                                                  // return list of names
         }
@@ -48,16 +55,23 @@ namespace Citi_Bike_Data_01
         {
             List<string> tableNames = new List<string>();                                       // empty list for the names
 
-            using (SqlConnection connection = new SqlConnection(connectionString))              // create connection to DB
+            try
             {
-                connection.Open();                                                              // open connection to DB
-                DataTable table = connection.GetSchema("Tables");                               // get the table
-                connection.Close();                                                             // close connection
-
-                foreach (DataRow r in table.Rows)
+                using (SqlConnection connection = new SqlConnection(connectionString))          // create connection to DB
                 {
-                    tableNames.Add(r[2].ToString());                                            // save each table name
+                    connection.Open();                                                          // open connection to DB
+                    DataTable table = connection.GetSchema("Tables");                           // get the table
+                    connection.Close();                                                         // close connection
+
+                    foreach (DataRow r in table.Rows)
+                    {
+                        tableNames.Add(r[2].ToString());                                        // save each table name
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not get table names from DB" + Environment.NewLine + ex.Message.ToString());
             }
             return tableNames;                                                                  // return list of names
         }
@@ -124,7 +138,7 @@ namespace Citi_Bike_Data_01
                     while (!csvReader.EndOfData)
                     {
                         string[] fieldData = csvReader.ReadFields();
-                        for(int i = 0; i < fieldData.Length; i++)
+                        for (int i = 0; i < fieldData.Length; i++)
                         {
                             if (fieldData[i] == "")
                                 fieldData[i] = null;
