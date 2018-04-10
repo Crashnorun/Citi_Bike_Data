@@ -213,7 +213,7 @@ namespace Citi_Bike_Data_01
 
             if (fileNamesNew.Count > 0)
             {
-                cls_Helper.DownloadFiles(fileNamesNew, XMLWebAddress);                          // download unique files from amazon
+                cls_DataBase_Helper.DownloadFiles(connectionString, fileNamesNew, XMLWebAddress);                          // download unique files from amazon
                 // save file to temporary locaiton
                 // unzip folder
                 // for each csv file, load into database

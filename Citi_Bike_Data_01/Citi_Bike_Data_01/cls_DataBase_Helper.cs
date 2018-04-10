@@ -8,6 +8,9 @@ using System.Data;
 using System.Diagnostics;
 using Microsoft.VisualBasic.FileIO;
 using System.Windows.Forms;                                                                     // used for displaying exceptions
+using System.Net;                       // used to download zip files
+using System.IO;                        // used to create directory
+using System.IO.Compression;            // used for unzipping files
 
 namespace Citi_Bike_Data_01
 {
@@ -107,51 +110,118 @@ namespace Citi_Bike_Data_01
 
 
         /// <summary>
+        /// Download unique files from Amazon server
+        /// </summary>
+        /// <reverence>download file - https://msdn.microsoft.com/en-us/library/ez801hhe(v=vs.110).aspx </reverence>
+        /// <reference> unzip file - https://stackoverflow.com/questions/22604941/how-can-i-unzip-a-file-to-a-net-memory-stream </reference>
+        /// <param name="UniqueFileNames"> List of files names to be downloaded</param>
+        /// <param name="XMLWebAddress"> The URL where the XML data can be downloaded</param>
+        public static void DownloadFiles(string ConnectionString, List<string> UniqueFileNames, string XMLWebAddress)
+        {
+            string webaddress, destinationFile;
+            string assemblyFolderPath = cls_Helper.GetExecutingAssemblyPath();                  // get assembly folder path
+            string destinationFolder = cls_Helper.GetDataFolder(assemblyFolderPath);            // get folder path where data will be stored
+
+            using (WebClient client = new WebClient())
+            {
+                foreach (string uniqueName in UniqueFileNames)                                  // go through all the new file names
+                {
+                    //web address format: https://s3.amazonaws.com/tripdata/201307-201402-citibike-tripdata.zip
+                    webaddress = XMLWebAddress + uniqueName;                                    // get the url of the new file name
+                    destinationFile = destinationFolder + @"\" + uniqueName;                    // create full file name path
+                    //string tempFolderPath = Path.GetTempPath();                               // temporary folder path
+                    client.DownloadFile(webaddress, destinationFile);                           // download the file
+                    using (FileStream fileStream = File.OpenRead(destinationFile))              // stream zip file
+                    {
+                        using (ZipArchive unzippedFile = new ZipArchive(fileStream, ZipArchiveMode.Read))  // unzip files
+                        {
+                            foreach (ZipArchiveEntry entry in unzippedFile.Entries)             // go through each of the files in the zip file
+                            {
+                                DataTable csvTable = GetDataTableFromCSVFile(entry, destinationFolder + @"\" + entry.FullName);
+
+                                AddDataTableToDataBase(csvTable, ConnectionString);
+                                // add the file name to the DB
+                                // add new table to DB
+                                //using (Stream stram = entry.Open()) {}                             // open the csv file
+                            }
+                        }
+                    }
+
+
+                    /* 
+                    * unzip files
+                    * save file names to data base
+                    */
+                }
+            }
+        }
+        //-----------------------------------------------------------------------
+
+
+        /// <summary>
         /// This will take a csv file and covert it to a data table
         /// </summary>
         /// <reference> CSV to datatable = https://stackoverflow.com/questions/20759302/upload-csv-file-to-sql-server </reference>
         /// <param name="csvFilePath"> Full file path where CSV file is located </param>
         /// <returns> Returns a datatable from a CSV file </returns>
-        public static DataTable GetDataTableFromCSVFile(string csvFilePath)
+        public static DataTable GetDataTableFromCSVFile(ZipArchiveEntry entry, string csvFilePath)
         {
-            string[] directoryPaths = csvFilePath.Split('/');                                   // get split the folder path
-            string fileName = directoryPaths[directoryPaths.Length - 1];                        // get the file name from the path
-            fileName = fileName.Split('.')[0];                                                  // remove the file extension ".zip"
+            string fileName = entry.FullName.Split('.')[0];                                     // get the file name without file extension
+            DataTable csvData = new DataTable(fileName.ToUpper());                              // create new data table with table name = file name
 
-            DataTable csvData = new DataTable(fileName);                                        // create new data table with table name = file name
             try
             {
-                using (TextFieldParser csvReader = new TextFieldParser(csvFilePath))
+                using (Stream stream = entry.Open())                                            // open the csv file
                 {
-                    csvReader.SetDelimiters(new string[] { "," });                              // set delimiter
-                    csvReader.HasFieldsEnclosedInQuotes = false;                                // entries do not have quotes
-                    string[] colFields = csvReader.ReadFields();
-                    foreach (string column in colFields)
-                    {
-                        // NEED TO MAKE SURE THE ENTRIES GO IN THE RIGHT COLUMN
-                        // COLUMN HEADERS?
-                        DataColumn dataColumn = new DataColumn(column);
-                        dataColumn.AllowDBNull = true;
-                        csvData.Columns.Add(dataColumn);
-                    }
-
-                    while (!csvReader.EndOfData)
-                    {
-                        string[] fieldData = csvReader.ReadFields();
-                        for (int i = 0; i < fieldData.Length; i++)
-                        {
-                            if (fieldData[i] == "")
-                                fieldData[i] = null;
-                        }
-                        csvData.Rows.Add(fieldData);
-                    }
+                    StreamReader reader = new StreamReader(stream);
+                    string[] columnNames = reader.ReadLine().Replace("\"","").Split(',');       // read the column headers
+                    DataColumn[] columns = new DataColumn[columnNames.Length];
+                    
+                    for (int i = 0; i < columns.Length; i++)
+                        columns[i] = new DataColumn(columnNames[i].ToUpper(), typeof(string));  // set column names and data type
+                    
+                    csvData.Columns.AddRange(columns);                                          // add columns to data table
+                    while (!reader.EndOfStream)
+                        csvData.Rows.Add(reader.ReadLine().Split(','));                         // add data to data table
                 }
             }
             catch (Exception ex)
             {
-                return null;
+                Debug.Print("Could not create DataTable from CSV Stream" + Environment.NewLine + ex.Message.ToString() +
+                    Environment.NewLine + ex.StackTrace.ToString());
             }
             return csvData;
+        }
+        //-----------------------------------------------------------------------
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <reference> https://www.morgantechspace.com/2014/04/Insert-DataTable-into-SQL-Table-in-C-Sharp.html </reference>
+        /// <param name="csvTable"> Datatable to insert into database </param>
+        /// <param name="connectionString"> Database connection string </param>
+        public static void AddDataTableToDataBase(DataTable csvTable, string connectionString)
+        {
+            using(SqlConnection connection = new SqlConnection(connectionString))               // create a connection
+            {
+                string query = "Create Table " + csvTable.TableName + "(";                      // begin format of query string
+                for (int i = 0; i < csvTable.Columns.Count; i++)
+                    query += (i < csvTable.Columns.Count - 1) ? csvTable.Columns[i].ColumnName + " string, " : 
+                        csvTable.Columns[i].ColumnName + " string)";                            // add column names to query string
+
+                connection.Open();                                                              // open connection to DB
+                SqlCommand command = new SqlCommand(query, connection);                         // create sql command
+                command.ExecuteNonQuery();                                                      // execute command string
+
+                using(SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(connection))
+                {
+                    sqlBulkCopy.DestinationTableName = csvTable.TableName;
+                    foreach (DataColumn col in csvTable.Columns)                                // bulk copy each column
+                        sqlBulkCopy.ColumnMappings.Add(col.ToString(), col.ToString());
+                    sqlBulkCopy.WriteToServer(csvTable);
+                }
+            }
         }
 
     }       // close class
