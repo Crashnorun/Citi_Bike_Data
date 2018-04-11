@@ -314,8 +314,6 @@ namespace Citi_Bike_Data_01
                         columnHeaders += "varchar(50)";
                         break;
                 }
-                DateTime dt = DateTime.Now;
-                dt.GetType().GetElementType();
                 if (i != columnNames.Count - 1)
                     columnHeaders += " , ";
             }
@@ -336,9 +334,9 @@ namespace Citi_Bike_Data_01
         {
             using (SqlConnection connection = new SqlConnection(connectionString))              // create connection
             {
-                SqlCommand cmd = new SqlCommand("DELETE " + tableName, connection);             // create delete command
+                SqlCommand cmd = new SqlCommand("DROP TABLE " + tableName, connection);             // create delete command
                 connection.Open();
-                cmd.ExecuteNonQuery();
+                int i = cmd.ExecuteNonQuery();
                 connection.Close();
             }
         }

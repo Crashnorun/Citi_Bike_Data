@@ -193,11 +193,10 @@ namespace Citi_Bike_Data_01
         {
             // add first table
             // zipfile name, csv file names, table number
-            List<string> columnNames = new List<string>() { "ZipFileNames", "CsvFileNames", "City", "TableIndex" };
-            List<Type> types = new List<Type>() { typeof(string), typeof(string), typeof(string), typeof(int) };
-            cls_DataBase_Helper.AddTable(connectionString, "ZipFileNames", columnNames, types);
-
-            cls_DataBase_Helper.DeleteTable(connectionString, "FileNames");
+            // List<string> columnNames = new List<string>() { "ZipFileNames", "CsvFileNames", "City", "TableIndex" };
+            // List<Type> types = new List<Type>() { typeof(string), typeof(string), typeof(string), typeof(int) };
+            // cls_DataBase_Helper.AddTable(connectionString, "ZipFileNames", columnNames, types);
+            // cls_DataBase_Helper.DeleteTable(connectionString, "FileNames");
 
 
             this.StatusText.Content = "Retrieving table names";                                 // set UI text
