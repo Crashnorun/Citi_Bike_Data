@@ -191,6 +191,15 @@ namespace Citi_Bike_Data_01
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            // add first table
+            // zipfile name, csv file names, table number
+            List<string> columnNames = new List<string>() { "ZipFileNames", "CsvFileNames", "City", "TableIndex" };
+            List<Type> types = new List<Type>() { typeof(string), typeof(string), typeof(string), typeof(int) };
+            cls_DataBase_Helper.AddTable(connectionString, "ZipFileNames", columnNames, types);
+
+            cls_DataBase_Helper.DeleteTable(connectionString, "FileNames");
+
+
             this.StatusText.Content = "Retrieving table names";                                 // set UI text
             fileNamesLocal = cls_DataBase_Helper.GetTableNames(this, connectionString);         // get list of DB table names
             //fileNamesLocal = cls_DataBase_Helper.GetTableNames(connectionString, this);
@@ -199,7 +208,7 @@ namespace Citi_Bike_Data_01
                 Debug.Print("File names in DB <= 0");
                 return;
             }
-                
+
             this.StatusText.Content = "Retrieving Citi Bike data set names";                    // set UI text
             fileNamesWeb = cls_Web_Helper.GetListOfFileNames(XMLWebAddress);                    // get the number of files on amazon
             if (fileNamesWeb.Count <= 0)

@@ -39,7 +39,7 @@ namespace Citi_Bike_Data_01
                     if (node.InnerXml.Contains(".zip"))                                             // if the name contains a .zip
                     {                                             
                         string fileName = node.InnerXml.Split('.')[0];                              // get rid of file extension .zip
-                        fileNamesWeb.Add(node.InnerXml);                                            // save file name
+                        fileNamesWeb.Add(fileName);                                                 // save file name
                     }
                 }
             }

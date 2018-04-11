@@ -272,13 +272,77 @@ namespace Citi_Bike_Data_01
         //-----------------------------------------------------------------------
 
 
-
-        // add table
-        static void AddTable(string connectionString, string tableName = "", List<string> columNames = null)
+        /// <summary>
+        /// Add a table to the DB. List length of column names must match the list length of types.
+        /// </summary>
+        /// <param name="connectionString"> Connection String where DB is located </param>
+        /// <param name="tableName"> Table name to add </param>
+        /// <param name="columnNames"> List of column names </param>
+        /// <param name="types"> List of data types for each column</param>
+        public static void AddTable(string connectionString, string tableName = "", List<string> columnNames = null, List<Type> types = null)
         {
+            if (columnNames.Count != types.Count)
+                throw new Exception("Number of columns does not match number of types");
 
+            string columnHeaders = "";
+            for (int i = 0; i < columnNames.Count; i++)
+            {
+                columnHeaders += columnNames[i] + " ";                                          // format column headers
+                switch (types[i].Name.ToLower())
+                {
+                    case "string":
+                        columnHeaders += "varchar(50)";
+                        break;
+                    case "int32":
+                    case "int64":
+                    case "int16":
+                    case "long":
+                        columnHeaders += "integer";
+                        break;
+                    case "double":
+                    case "float":
+                    case "decimal":
+                        columnHeaders += "double precision";
+                        break;
+                    case "boolean":
+                        columnHeaders += "boolean";
+                        break;
+                    case "datetime":
+                        columnHeaders += "timestamp";
+                        break;
+                    default:
+                        columnHeaders += "varchar(50)";
+                        break;
+                }
+                DateTime dt = DateTime.Now;
+                dt.GetType().GetElementType();
+                if (i != columnNames.Count - 1)
+                    columnHeaders += " , ";
+            }
+
+            using (SqlConnection connection = new SqlConnection(connectionString))              // create connection
+            {
+                SqlCommand cmd = new SqlCommand("CREATE TABLE " + tableName + " (" + columnHeaders + ")", connection);    // create table
+                connection.Open();
+                cmd.ExecuteNonQuery();
+                connection.Close();
+            }
         }
+        //-----------------------------------------------------------------------
 
+
+        // delete table
+        public static void DeleteTable(string connectionString, string tableName)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))              // create connection
+            {
+                SqlCommand cmd = new SqlCommand("DELETE " + tableName, connection);             // create delete command
+                connection.Open();
+                cmd.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+        //-----------------------------------------------------------------------
 
     }       // close class
 }           // close namespace
