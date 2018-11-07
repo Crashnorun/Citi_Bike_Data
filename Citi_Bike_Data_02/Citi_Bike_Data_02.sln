@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2048
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Citi_Bike_Data_02", "Citi_Bike_Data_02\Citi_Bike_Data_02.csproj", "{638E5475-8E90-4F39-8D07-BD7C0CA72AFC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{638E5475-8E90-4F39-8D07-BD7C0CA72AFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{638E5475-8E90-4F39-8D07-BD7C0CA72AFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{638E5475-8E90-4F39-8D07-BD7C0CA72AFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{638E5475-8E90-4F39-8D07-BD7C0CA72AFC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {86C24537-787F-4B7C-AC3F-68F39C86F18D}
+	EndGlobalSection
+EndGlobal
