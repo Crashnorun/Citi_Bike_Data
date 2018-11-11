@@ -6,7 +6,10 @@
         xmlns:local="clr-namespace:Citi_Bike_Data_02"
         mc:Ignorable="d"
         Title="Citi Bike " Height="450" Width="800">
-    <Grid>
-        
+    
+    <Grid x:Name="grid_01">
+       <!-- <TabItem x:Name="tabItem01">-->
+            <!--<controls:UserControl1></controls:UserControl1>-->
+       <!-- </TabItem> -->
     </Grid>
 </Window>

@@ -7,9 +7,17 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <ProgressBar Margin="10,0,10,10" Height="10" VerticalAlignment="Bottom" Foreground="{StaticResource CitiBikeColorHEX}"/>
-        <Label Content="Label" Margin="10,0,10,20" Height="26" VerticalAlignment="Bottom"/>
-        <Button x:Name="btn_CreateDB" Content="CreateDB" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="75" Click="btn_CreateDB_Click"/>
-
+        <ProgressBar x:Name="progressBar1" Margin="10,0,10,10" Height="10" VerticalAlignment="Bottom" Foreground="#FF06B03C" Background="#FFF7F7F7" BorderBrush="#FFF7F7F7"/>
+        <Label x:Name="lbl_Status_01" Content="Label" Margin="10,0,10,20" Height="26" VerticalAlignment="Bottom"/>
+        <Button x:Name="btn_ConnectDB" Content="Connect To DB" 
+                HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="90" 
+                Click="btn_CreateDB_Click" BorderBrush="{x:Null}"
+                ToolTip="Test DB Connection" ToolTipService.ShowDuration="5000">
+        </Button>
+        <Button x:Name="btn_DlXML" Content="Download XML"
+                HorizontalAlignment="Left" Margin="10,35,0,0" Height="26" VerticalAlignment="Top" Width="90"
+                Click="btn_DlXML_Click" BorderBrush="{x:Null}"
+                ToolTip="Download XML from AWS" ToolTipService.ShowDuration="5000">
+        </Button>
     </Grid>
 </UserControl>

@@ -23,6 +23,8 @@ namespace Citi_Bike_Data_02
         public MainWindow()
         {
             InitializeComponent();
+            UI.UserControl1 uc1 = new UI.UserControl1();                                        // create new instance of User control
+            this.grid_01.Children.Add(uc1);                                                     // apply user control to grid
         }
     }
 }

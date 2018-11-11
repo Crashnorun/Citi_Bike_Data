@@ -61,7 +61,7 @@ namespace Citi_Bike_Data_02.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 0b2a85.
+        ///   Looks up a localized string similar to #0b2a85.
         /// </summary>
         internal static string CitiBikeColorHEX {
             get {
@@ -75,6 +75,24 @@ namespace Citi_Bike_Data_02.Properties {
         internal static string CitiBikeColorRGB {
             get {
                 return ResourceManager.GetString("CitiBikeColorRGB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\cportelli\Documents\Personal\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True;Connect Timeout=30.
+        /// </summary>
+        internal static string ConnectionString {
+            get {
+                return ResourceManager.GetString("ConnectionString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://s3.amazonaws.com/tripdata/.
+        /// </summary>
+        internal static string URLXML {
+            get {
+                return ResourceManager.GetString("URLXML", resourceCulture);
             }
         }
     }

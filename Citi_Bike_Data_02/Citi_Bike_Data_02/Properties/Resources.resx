@@ -118,9 +118,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CitiBikeColorHEX" xml:space="preserve">
-    <value>0b2a85</value>
+    <value>#0b2a85</value>
   </data>
   <data name="CitiBikeColorRGB" xml:space="preserve">
     <value>11,42,133</value>
+  </data>
+  <data name="ConnectionString" xml:space="preserve">
+    <value>Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\cportelli\Documents\Personal\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True;Connect Timeout=30</value>
+  </data>
+  <data name="URLXML" xml:space="preserve">
+    <value>https://s3.amazonaws.com/tripdata/</value>
   </data>
 </root>
