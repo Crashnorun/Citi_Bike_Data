@@ -16,6 +16,7 @@ using System.Data.SqlClient;
 using System.Net;
 using System.Reflection;
 using System.Xml.Linq;
+using System.Xml;
 
 namespace Citi_Bike_Data_02.UI
 {
@@ -24,7 +25,13 @@ namespace Citi_Bike_Data_02.UI
     /// </summary>
     public partial class UserControl1 : UserControl
     {
+        #region ----PROPERTIES
+
         public XDocument XMLDocument;
+
+        #endregion
+
+        #region ----UI----
 
         public UserControl1()
         {
@@ -82,6 +89,11 @@ namespace Citi_Bike_Data_02.UI
                 XMLDocument.Save(localPath + "\\XMLDoc.xml");                                   // save the xml doc
                 lbl_Status_01.Content = "Downloaded XML Data";
             }
+
+            if (XMLDocument != null)
+            {
+                ExtractXipFileList();
+            }
         }
 
 
@@ -98,5 +110,49 @@ namespace Citi_Bike_Data_02.UI
             }
 
         }
+
+        #endregion
+
+        #region ----FUNCTIONS----
+
+        // extract zip files from xml document
+
+        private void ExtractXipFileList()
+        {
+          
+
+            var obj = XMLDocument.Descendants().Where(n => n.Name == "Key");
+            //XmlNodeList elemList = XMLDocument.Nodes();
+            //IEnumerable<XNode> nodes = XMLDocument.Nodes();
+
+            //IEnumerable < XElement > xmlEles = XMLDocument.Elements();
+            //IEnumerable<XNode> nodes = xmlEles.Nodes();
+
+            //XmlNodeList nodes = XMLDocument.GetElementsByTagName("Item");
+
+            //foreach (XmlNode child in node.SelectNodes("property"))
+            //{
+            //    if (child.Name == "property")
+            //    {
+            //        doSomethingElse()
+            //        }
+            //}
+
+
+            //for (int i = 0; i < nodes.Count(); i++)
+            //{
+            //    var obj = nodes.ElementAt(i).ToString();
+            //    System.Diagnostics.Debug.Print(obj.ToString());
+
+            //    //string attrVal = elemList[i].Attributes["SuperString"].Value;
+
+            //}
+
+
+
+
+        }
+
+        #endregion
     }
 }
