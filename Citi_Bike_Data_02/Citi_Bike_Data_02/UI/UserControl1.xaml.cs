@@ -17,6 +17,7 @@ using System.Net;
 using System.Reflection;
 using System.Xml.Linq;
 using System.Xml;
+using System.Diagnostics;
 
 namespace Citi_Bike_Data_02.UI
 {
@@ -25,11 +26,24 @@ namespace Citi_Bike_Data_02.UI
     /// </summary>
     public partial class UserControl1 : UserControl
     {
-        #region ----PROPERTIES
+        #region ----PROPERTIES----
 
         public XDocument XMLDocument;
+        public List<string> ZIPFileNamesOnline
+        {
+            get { return ExtractZipFileList(); }
+        }
 
         #endregion
+
+
+        #region ----FIELDS----
+
+
+
+
+        #endregion
+
 
         #region ----UI----
 
@@ -56,10 +70,16 @@ namespace Citi_Bike_Data_02.UI
                 {
                     conn.Open();                                                                // open connection to db
                     lbl_Status_01.Content = "Established connection to DB";
+#if DEBUG
+                    Debug.Print("Established DB Connection");
+#endif
                 }
                 catch (SqlException ex)
                 {
                     lbl_Status_01.Content = "Unable to establish connection to DB" + ex.Message;
+#if DEBUG
+                    Debug.Print("CANNOT Established DB Connection");
+#endif
                 }
             }
         }
@@ -85,6 +105,13 @@ namespace Citi_Bike_Data_02.UI
                 wc.DownloadProgressChanged += ProgressBarChanged;
                 // wc.DownloadFileAsync(new System.Uri(Properties.Resources.URLXML), localPath + "\\XMLDatat.XML");
                 string strXML = wc.DownloadString(Properties.Resources.URLXML);                 // get the xml string
+
+                if (string.IsNullOrEmpty(strXML))                                               // if the xml doc is blank
+                {
+                    this.lbl_Status_01.Content = "Cannot access URL for XML data";
+                    return;
+                }
+
                 XMLDocument = XDocument.Parse(strXML);                                          // parse the string into XML format
                 XMLDocument.Save(localPath + "\\XMLDoc.xml");                                   // save the xml doc
                 lbl_Status_01.Content = "Downloaded XML Data";
@@ -92,8 +119,9 @@ namespace Citi_Bike_Data_02.UI
 
             if (XMLDocument != null)
             {
-                ExtractXipFileList();
+                ExtractZipFileList();
             }
+            this.progressBar1.Value = 0;                                                        // reset progress bar (I think)
         }
 
 
@@ -113,44 +141,30 @@ namespace Citi_Bike_Data_02.UI
 
         #endregion
 
+
         #region ----FUNCTIONS----
 
-        // extract zip files from xml document
-
-        private void ExtractXipFileList()
+        /// <summary>
+        /// Extract the ZIP file names from the XML document
+        /// </summary>
+        /// <returns>List of ZIP file names</returns>
+        private List<string> ExtractZipFileList()
         {
-          
+            //var tempFileNames = from keys in XMLDocument.Descendants().ToList()                     // from all the nodes in the xml file
+            //                    where keys.Name.LocalName == "Key" && !keys.Value.Contains("JC")    // select the child nodes with zip files, excluding JC
+            //                    select keys.Value;
 
-            var obj = XMLDocument.Descendants().Where(n => n.Name == "Key");
-            //XmlNodeList elemList = XMLDocument.Nodes();
-            //IEnumerable<XNode> nodes = XMLDocument.Nodes();
+            var tempFileNames = from keys in XMLDocument.Descendants().ToList()                     // from all the nodes in the xml file
+                                where keys.Value.Contains(".zip") && !keys.Value.Contains("JC")    // select the child nodes with zip files, excluding JC
+                                select keys.Value;
 
-            //IEnumerable < XElement > xmlEles = XMLDocument.Elements();
-            //IEnumerable<XNode> nodes = xmlEles.Nodes();
+            List<string> zipFileNamesOnline = new List<string>();
+            zipFileNamesOnline = tempFileNames.ToList();
 
-            //XmlNodeList nodes = XMLDocument.GetElementsByTagName("Item");
-
-            //foreach (XmlNode child in node.SelectNodes("property"))
-            //{
-            //    if (child.Name == "property")
-            //    {
-            //        doSomethingElse()
-            //        }
-            //}
-
-
-            //for (int i = 0; i < nodes.Count(); i++)
-            //{
-            //    var obj = nodes.ElementAt(i).ToString();
-            //    System.Diagnostics.Debug.Print(obj.ToString());
-
-            //    //string attrVal = elemList[i].Attributes["SuperString"].Value;
-
-            //}
-
-
-
-
+#if DEBUG
+            Debug.Print("Number of ZIP files in XML File: " + zipFileNamesOnline.Count);
+#endif
+            return zipFileNamesOnline;
         }
 
         #endregion

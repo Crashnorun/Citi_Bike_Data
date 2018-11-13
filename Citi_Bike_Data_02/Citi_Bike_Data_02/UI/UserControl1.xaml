@@ -10,14 +10,15 @@
         <ProgressBar x:Name="progressBar1" Margin="10,0,10,10" Height="10" VerticalAlignment="Bottom" Foreground="#FF06B03C" Background="#FFF7F7F7" BorderBrush="#FFF7F7F7"/>
         <Label x:Name="lbl_Status_01" Content="Label" Margin="10,0,10,20" Height="26" VerticalAlignment="Bottom"/>
         <Button x:Name="btn_ConnectDB" Content="Connect To DB" 
-                HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="90" 
+                HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="149" 
                 Click="btn_CreateDB_Click" BorderBrush="{x:Null}"
-                ToolTip="Test DB Connection" ToolTipService.ShowDuration="5000">
+                ToolTip="Test DB Connection" ToolTipService.ShowDuration="5000" Height="26">
         </Button>
         <Button x:Name="btn_DlXML" Content="Download XML"
-                HorizontalAlignment="Left" Margin="10,35,0,0" Height="26" VerticalAlignment="Top" Width="90"
+                HorizontalAlignment="Left" Margin="10,46,0,0" Height="26" VerticalAlignment="Top" Width="149"
                 Click="btn_DlXML_Click" BorderBrush="{x:Null}"
                 ToolTip="Download XML from AWS" ToolTipService.ShowDuration="5000">
         </Button>
+        <Button Content="Compare ZIP File Names" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top" Width="149" BorderBrush="{x:Null}" Height="26"/>
     </Grid>
 </UserControl>
