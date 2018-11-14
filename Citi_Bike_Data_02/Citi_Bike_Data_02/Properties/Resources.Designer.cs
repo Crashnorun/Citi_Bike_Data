@@ -88,6 +88,15 @@ namespace Citi_Bike_Data_02.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ZIPFileNames.
+        /// </summary>
+        internal static string TableZIPFileName {
+            get {
+                return ResourceManager.GetString("TableZIPFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to https://s3.amazonaws.com/tripdata.
         /// </summary>
         internal static string URLXML {

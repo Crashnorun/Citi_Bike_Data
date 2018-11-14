@@ -19,6 +19,6 @@
                 Click="btn_DlXML_Click" BorderBrush="{x:Null}"
                 ToolTip="Download XML from AWS" ToolTipService.ShowDuration="5000">
         </Button>
-        <Button Content="Compare ZIP File Names" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top" Width="149" BorderBrush="{x:Null}" Height="26"/>
+        <Button x:Name="btn_CompareZipFiles" Content="Compare ZIP File Names" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top" Width="149" BorderBrush="{x:Null}" Height="26" Click="btn_CompareZipFiles_Click"/>
     </Grid>
 </UserControl>

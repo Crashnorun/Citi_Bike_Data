@@ -92,6 +92,49 @@ namespace Citi_Bike_Data_02.UI
         /// <param name="e"></param>
         private void btn_DlXML_Click(object sender, RoutedEventArgs e)
         {
+            DownloadXMLFile();
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_CompareZipFiles_Click(object sender, RoutedEventArgs e)
+        {
+            if (XMLDocument == null)
+                DownloadXMLFile();
+
+            GetZIPFileNamesFromDB();
+        }
+
+
+        void ProgressBarChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                DownloadProgressChangedEventArgs ev = (DownloadProgressChangedEventArgs)e;
+                progressBar1.Value = ev.ProgressPercentage;
+            }
+            catch (Exception ex)
+            {
+                lbl_Status_01.Content = ex.Message;
+            }
+
+        }
+
+        #endregion
+
+
+        #region ----FUNCTIONS----
+
+
+        /// <summary>
+        /// Download XML file from Amazon
+        /// </summary>
+        private void DownloadXMLFile()
+        {
             // get executing assembly file path
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;                         // path in URI format
             UriBuilder uri = new UriBuilder(codeBase);
@@ -125,25 +168,6 @@ namespace Citi_Bike_Data_02.UI
         }
 
 
-        void ProgressBarChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                DownloadProgressChangedEventArgs ev = (DownloadProgressChangedEventArgs)e;
-                progressBar1.Value = ev.ProgressPercentage;
-            }
-            catch (Exception ex)
-            {
-                lbl_Status_01.Content = ex.Message;
-            }
-
-        }
-
-        #endregion
-
-
-        #region ----FUNCTIONS----
-
         /// <summary>
         /// Extract the ZIP file names from the XML document
         /// </summary>
@@ -167,6 +191,56 @@ namespace Citi_Bike_Data_02.UI
             return zipFileNamesOnline;
         }
 
+
+        // get file names from DB
+
+        private List<string> GetZIPFileNamesFromDB()
+        {
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
+            {
+                List<string> tempZipFileNamesOnline = ZIPFileNamesOnline;
+
+                try
+                {
+
+                    lbl_Status_01.Content = "Reading DB ZIP File Names";
+                    string sql = "select * from " + Properties.Resources.TableZIPFileName;      // create query string
+                    conn.Open();                                                                // open connection to db
+                    SqlCommand sqlCommand = new SqlCommand(sql, conn);                          // sql command
+                    SqlDataReader reader = sqlCommand.ExecuteReader();
+
+                    Debug.Print(reader.FieldCount.ToString());
+                    if (reader.HasRows)                                                         // if there is data
+                    {
+                        while (reader.Read())
+                        {
+                            Debug.Print(reader["ZIPFileName"].ToString());
+                            // compare lists
+                        }
+                    }
+                    SqlCommand AddZIPFileNamesCommand = new SqlCommand("Insert into " + Properties.Resources.TableZIPFileName +
+                        "(ZIPFileName) Values (@param1)", conn);
+                    foreach (string name in tempZipFileNamesOnline)
+                        AddZIPFileNamesCommand.Parameters[0].Value = name;
+
+#if DEBUG
+                    Debug.Print("Writinging DB ZIP File Names");
+#endif
+                }
+                catch (SqlException ex)
+                {
+                    lbl_Status_01.Content = "CANNOT Read / Write DB ZIP File Names" + ex.Message;
+#if DEBUG
+                    Debug.Print("CANNOT Read / Write DB ZIP File Names");
+#endif
+                }
+            }
+
+            return null;
+        }
+
         #endregion
+
+
     }
 }
