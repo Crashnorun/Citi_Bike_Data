@@ -220,16 +220,19 @@ namespace Citi_Bike_Data_02.UI
                     reader.Close();
 
                     SqlCommand AddZIPFileNamesCommand = new SqlCommand("Insert into " + Properties.Resources.TableZIPFileName +
-                        "(ZIPFileName) Values (@ Id, @ZIPFileName)", conn);
+                        " (Id, ZIPFileName) Values (@Id, @ZIPFileName)", conn);
 
-                    for (int i = 0; i < tempZipFileNamesOnline.Count; i++)                      // add ZIP file names to DB
-                    {
-                        AddZIPFileNamesCommand.Parameters.AddWithValue("@Id", i);
-                        AddZIPFileNamesCommand.Parameters.AddWithValue("@ZIPFileName", tempZipFileNamesOnline[i]);
-                        AddZIPFileNamesCommand.ExecuteNonQuery();
-                        AddZIPFileNamesCommand.Parameters.Clear();
-                    }
+                    Debug.Print(AddZIPFileNamesCommand.Parameters.Count.ToString());
+
+                    //for (int i = 0; i < tempZipFileNamesOnline.Count; i++)                      // add ZIP file names to DB
+                    //{
+                    //    AddZIPFileNamesCommand.Parameters[0].Value = i;
+                    //    AddZIPFileNamesCommand.Parameters[1].Value = tempZipFileNamesOnline[i];
+
+                    //    AddZIPFileNamesCommand.ExecuteNonQuery();
+                    //}
                     
+                    AddZIPFileNamesCommand.Parameters.Clear();
                     conn.Close();
 #if DEBUG
                     Debug.Print("Writinging DB ZIP File Names");
