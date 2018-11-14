@@ -81,6 +81,8 @@ namespace Citi_Bike_Data_02.UI
                     Debug.Print("CANNOT Established DB Connection");
 #endif
                 }
+                if (conn != null && conn.State == System.Data.ConnectionState.Open)         
+                    conn.Close();                                                               // close connection
             }
         }
 
@@ -129,7 +131,6 @@ namespace Citi_Bike_Data_02.UI
 
         #region ----FUNCTIONS----
 
-
         /// <summary>
         /// Download XML file from Amazon
         /// </summary>
@@ -161,9 +162,8 @@ namespace Citi_Bike_Data_02.UI
             }
 
             if (XMLDocument != null)
-            {
                 ExtractZipFileList();
-            }
+
             this.progressBar1.Value = 0;                                                        // reset progress bar (I think)
         }
 
@@ -193,7 +193,6 @@ namespace Citi_Bike_Data_02.UI
 
 
         // get file names from DB
-
         private List<string> GetZIPFileNamesFromDB()
         {
             using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
@@ -202,7 +201,6 @@ namespace Citi_Bike_Data_02.UI
 
                 try
                 {
-
                     lbl_Status_01.Content = "Reading DB ZIP File Names";
                     string sql = "select * from " + Properties.Resources.TableZIPFileName;      // create query string
                     conn.Open();                                                                // open connection to db
@@ -210,6 +208,7 @@ namespace Citi_Bike_Data_02.UI
                     SqlDataReader reader = sqlCommand.ExecuteReader();
 
                     Debug.Print(reader.FieldCount.ToString());
+
                     if (reader.HasRows)                                                         // if there is data
                     {
                         while (reader.Read())
@@ -218,20 +217,33 @@ namespace Citi_Bike_Data_02.UI
                             // compare lists
                         }
                     }
-                    SqlCommand AddZIPFileNamesCommand = new SqlCommand("Insert into " + Properties.Resources.TableZIPFileName +
-                        "(ZIPFileName) Values (@param1)", conn);
-                    foreach (string name in tempZipFileNamesOnline)
-                        AddZIPFileNamesCommand.Parameters[0].Value = name;
+                    reader.Close();
 
+                    SqlCommand AddZIPFileNamesCommand = new SqlCommand("Insert into " + Properties.Resources.TableZIPFileName +
+                        "(ZIPFileName) Values (@ Id, @ZIPFileName)", conn);
+
+                    for (int i = 0; i < tempZipFileNamesOnline.Count; i++)                      // add ZIP file names to DB
+                    {
+                        AddZIPFileNamesCommand.Parameters.AddWithValue("@Id", i);
+                        AddZIPFileNamesCommand.Parameters.AddWithValue("@ZIPFileName", tempZipFileNamesOnline[i]);
+                        AddZIPFileNamesCommand.ExecuteNonQuery();
+                        AddZIPFileNamesCommand.Parameters.Clear();
+                    }
+                    
+                    conn.Close();
 #if DEBUG
                     Debug.Print("Writinging DB ZIP File Names");
 #endif
                 }
                 catch (SqlException ex)
                 {
+                    if (conn != null && conn.State ==System.Data.ConnectionState.Open)
+                        conn.Close();
+
                     lbl_Status_01.Content = "CANNOT Read / Write DB ZIP File Names" + ex.Message;
 #if DEBUG
-                    Debug.Print("CANNOT Read / Write DB ZIP File Names");
+                    Debug.Print("CANNOT Read / Write DB ZIP File Names " + Environment.NewLine +
+                        ex.Message);
 #endif
                 }
             }
