@@ -246,10 +246,23 @@ namespace Citi_Bike_Data_02.UI
         }
 
 
-        private void CompareZIPFileNames()
+        /// <summary>
+        /// Compare the ZIPFileNamesOnline with ZIPFileNamesDB and return unique / new names 
+        /// Remove any names in the Online list that already exist in the DB
+        /// </summary>
+        /// <returns>Return only the list of unique names</returns>
+        private List<string> CompareZIPFileNames()
         {
+            List<string> tempZIPFileNames = new List<string>(ZIPFileNamesOnline);               // duplicate the list
 
+            foreach(string name in ZIPFileNamesDB.Values)                                       // cycle throught he dictionary
+            {
+                if (tempZIPFileNames.Contains(name))                                            // if name exists
+                    tempZIPFileNames.Remove(name);                                              // remove it
+            }
+            return tempZIPFileNames;                                                            // return unique names
         }
+
 
         private void AddZIPFileNamesToDB(List<string> ZIPFileNames)
         {
