@@ -18,6 +18,7 @@ using System.Reflection;
 using System.Xml.Linq;
 using System.Xml;
 using System.Diagnostics;
+using System.Data;
 
 namespace Citi_Bike_Data_02.UI
 {
@@ -29,11 +30,16 @@ namespace Citi_Bike_Data_02.UI
         #region ----PROPERTIES----
 
         public XDocument XMLDocument;
+
         public List<string> ZIPFileNamesOnline
         {
             get { return ExtractZipFileList(); }
         }
 
+        public List<string> ZIPFileNamesDB
+        {
+            get { return GetZIPFileNamesFromDB(); }
+        }
         #endregion
 
 
@@ -81,7 +87,7 @@ namespace Citi_Bike_Data_02.UI
                     Debug.Print("CANNOT Established DB Connection");
 #endif
                 }
-                if (conn != null && conn.State == System.Data.ConnectionState.Open)         
+                if (conn != null && conn.State == System.Data.ConnectionState.Open)
                     conn.Close();                                                               // close connection
             }
         }
@@ -192,13 +198,17 @@ namespace Citi_Bike_Data_02.UI
         }
 
 
-        // get file names from DB
+        /// <summary>
+        /// Get list of ZIP file names from DB
+        /// If list.count = 0, then there are no file names in the db table
+        /// </summary>
+        /// <returns>List of ZIP File names in the DB. If list.count = 0, there are no file names in the DB</returns>
         private List<string> GetZIPFileNamesFromDB()
         {
-            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))   // create a connection
             {
-                List<string> tempZipFileNamesOnline = ZIPFileNamesOnline;
-
+                // List<string> tempZipFileNamesOnline = ZIPFileNamesOnline;
+                List<string> ZIPFileNamesDB = new List<string>();
                 try
                 {
                     lbl_Status_01.Content = "Reading DB ZIP File Names";
@@ -208,6 +218,7 @@ namespace Citi_Bike_Data_02.UI
                     SqlDataReader reader = sqlCommand.ExecuteReader();
 
                     Debug.Print(reader.FieldCount.ToString());
+                    lbl_Status_01.Content = "Number of ZIP File Names in DB: " + reader.FieldCount.ToString();
 
                     if (reader.HasRows)                                                         // if there is data
                     {
@@ -218,44 +229,75 @@ namespace Citi_Bike_Data_02.UI
                         }
                     }
                     reader.Close();
-
-                    SqlCommand AddZIPFileNamesCommand = new SqlCommand("Insert into " + Properties.Resources.TableZIPFileName +
-                        " (Id, ZIPFileName) Values (@Id, @ZIPFileName)", conn);
-
-                    Debug.Print(AddZIPFileNamesCommand.Parameters.Count.ToString());
-
-                    //for (int i = 0; i < tempZipFileNamesOnline.Count; i++)                      // add ZIP file names to DB
-                    //{
-                    //    AddZIPFileNamesCommand.Parameters[0].Value = i;
-                    //    AddZIPFileNamesCommand.Parameters[1].Value = tempZipFileNamesOnline[i];
-
-                    //    AddZIPFileNamesCommand.ExecuteNonQuery();
-                    //}
-                    
-                    AddZIPFileNamesCommand.Parameters.Clear();
                     conn.Close();
-#if DEBUG
-                    Debug.Print("Writinging DB ZIP File Names");
-#endif
                 }
-                catch (SqlException ex)
+                catch (Exception ex)
                 {
-                    if (conn != null && conn.State ==System.Data.ConnectionState.Open)
-                        conn.Close();
-
-                    lbl_Status_01.Content = "CANNOT Read / Write DB ZIP File Names" + ex.Message;
-#if DEBUG
-                    Debug.Print("CANNOT Read / Write DB ZIP File Names " + Environment.NewLine +
-                        ex.Message);
-#endif
+                    Debug.Print("Cannot read ZIP File names from DB" +
+                                            Environment.NewLine + ex.Message);
+                    lbl_Status_01.Content = "Cannot read ZIP File names from DB" +
+                                            Environment.NewLine + ex.Message;
                 }
+                return ZIPFileNamesDB;
+            }
+        }
+
+
+        private void AddZIPFileNamesToDB(List<string> ZIPFileNames)
+        {
+            // create a connection string
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))   // create a connection
+            {
+                conn.Open();
+                lbl_Status_01.Content = "Writing ZIP File Names to DB: " + ZIPFileNames.Count;
+
+                SqlCommand AddZIPFileNamesCommand = new SqlCommand("Insert into " + Properties.Resources.TableZIPFileName +
+                                    " (Id, ZIPFileName) Values (@Id, @ZIPFileName)", conn);
+
+                Debug.Print(AddZIPFileNamesCommand.Parameters.Count.ToString());
+
+                DataTable dt = new DataTable(Properties.Resources.TableZIPFileName);
+                dt.Columns.Add("Id");
+                dt.Columns.Add("ZIPFileName");
+
+                for (int i = 0; i < ZIPFileNames.Count; i++)                                    // add ZIP file names to DB
+                {
+                    dt.Rows.Add(new object[] { i, ZIPFileNames[i] });
+                }
+                //AddZIPFileNamesCommand.CommandType = CommandType.StoredProcedure;
+                AddZIPFileNamesCommand.Parameters.AddWithValue("@ZIPFileNames", dt);
+                AddZIPFileNamesCommand.ExecuteNonQuery();
+
+                //for (int i = 0; i < tempZipFileNamesOnline.Count; i++)                      // add ZIP file names to DB
+                //{
+                //    AddZIPFileNamesCommand.Parameters[0].Value = i;
+                //    AddZIPFileNamesCommand.Parameters[1].Value = tempZipFileNamesOnline[i];
+
+                //    AddZIPFileNamesCommand.ExecuteNonQuery();
+                //}
+
+                // AddZIPFileNamesCommand.Parameters.Clear();
+                conn.Close();
+#if DEBUG
+                Debug.Print("Writinging DB ZIP File Names");
+#endif
             }
 
-            return null;
+
+
+
+
+
+
+
+
+
+
+
         }
 
         #endregion
 
 
-    }
-}
+    }           // close class
+}               // close namespace
