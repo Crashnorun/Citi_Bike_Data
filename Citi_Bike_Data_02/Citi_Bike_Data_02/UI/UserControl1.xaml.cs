@@ -112,9 +112,10 @@ namespace Citi_Bike_Data_02.UI
                 DownloadXMLFile();
 
             ZIPFileNamesDB = GetZIPFileNamesFromDB();               // extract from db
-            ZIPFileNamesOnline = ExtractZipFileList();              // extract from xml file
-            // compare
-            // add new
+            ZIPFileNamesOnline = ExtractZipFileList(XMLDocument);   // extract from xml file
+            List<string> tempZIPFileNames = CompareZIPFileNames(ZIPFileNamesOnline, ZIPFileNamesDB);  // compare
+            if (tempZIPFileNames.Count > 0)
+                AddZIPFileNamesToDB(tempZIPFileNames);              // add new
         }
 
 
@@ -179,13 +180,13 @@ namespace Citi_Bike_Data_02.UI
         /// Extract the ZIP file names from the XML document
         /// </summary>
         /// <returns>List of ZIP file names</returns>
-        private List<string> ExtractZipFileList()
+        private List<string> ExtractZipFileList(XDocument xmlDocument)
         {
             //var tempFileNames = from keys in XMLDocument.Descendants().ToList()                     // from all the nodes in the xml file
             //                    where keys.Name.LocalName == "Key" && !keys.Value.Contains("JC")    // select the child nodes with zip files, excluding JC
             //                    select keys.Value;
 
-            var tempFileNames = from keys in XMLDocument.Descendants().ToList()                     // from all the nodes in the xml file
+            var tempFileNames = from keys in xmlDocument.Descendants().ToList()                     // from all the nodes in the xml file
                                 where keys.Value.Contains(".zip") && !keys.Value.Contains("JC")    // select the child nodes with zip files, excluding JC
                                 select keys.Value;
 
@@ -209,7 +210,7 @@ namespace Citi_Bike_Data_02.UI
         {
             using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))   // create a connection
             {
-                Dictionary<int, string> ZIPFileNamesDB = new Dictionary<int, string>();
+                Dictionary<int, string> zipFileNamesDB = new Dictionary<int, string>();
                 try
                 {
                     lbl_Status_01.Content = "Reading DB ZIP File Names";
@@ -227,7 +228,7 @@ namespace Citi_Bike_Data_02.UI
                             while (reader.Read())
                             {
                                 Debug.Print(reader["ZIPFileName"].ToString());
-                                ZIPFileNamesDB.Add(Convert.ToInt32(reader["Id"]), reader["ZIPFileName"].ToString());
+                                zipFileNamesDB.Add(Convert.ToInt32(reader["Id"]), reader["ZIPFileName"].ToString());
                             }
                         }
                         reader.Close();
@@ -241,7 +242,7 @@ namespace Citi_Bike_Data_02.UI
                     lbl_Status_01.Content = "Cannot read ZIP File names from DB" +
                                             Environment.NewLine + ex.Message;
                 }
-                return ZIPFileNamesDB;
+                return zipFileNamesDB;
             }
         }
 
@@ -251,11 +252,12 @@ namespace Citi_Bike_Data_02.UI
         /// Remove any names in the Online list that already exist in the DB
         /// </summary>
         /// <returns>Return only the list of unique names</returns>
-        private List<string> CompareZIPFileNames()
+        private List<string> CompareZIPFileNames(List<string> zipFileNamesOnline, Dictionary<int, string> zipFileNamesDB)
         {
-            List<string> tempZIPFileNames = new List<string>(ZIPFileNamesOnline);               // duplicate the list
+            lbl_Status_01.Content = "Comparing ZIP File Names";
+            List<string> tempZIPFileNames = new List<string>(zipFileNamesOnline);               // duplicate the list
 
-            foreach(string name in ZIPFileNamesDB.Values)                                       // cycle throught he dictionary
+            foreach(string name in zipFileNamesDB.Values)                                       // cycle throught he dictionary
             {
                 if (tempZIPFileNames.Contains(name))                                            // if name exists
                     tempZIPFileNames.Remove(name);                                              // remove it
@@ -264,29 +266,33 @@ namespace Citi_Bike_Data_02.UI
         }
 
 
-        private void AddZIPFileNamesToDB(List<string> ZIPFileNames)
+        private void AddZIPFileNamesToDB(List<string> zipFileNames)
         {
             // create a connection string
             using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))   // create a connection
             {
                 conn.Open();
-                lbl_Status_01.Content = "Writing ZIP File Names to DB: " + ZIPFileNames.Count;
+                lbl_Status_01.Content = "Writing ZIP File Names to DB: " + zipFileNames.Count;
 
                 SqlCommand AddZIPFileNamesCommand = new SqlCommand("Insert into " + Properties.Resources.TableZIPFileName +
                                     " (Id, ZIPFileName) Values (@Id, @ZIPFileName)", conn);
+                //AddZIPFileNamesCommand.Parameters.Add("@Id", DbType.Int32);
+               // AddZIPFileNamesCommand.Parameters.Add("@ZIPFileName", DbType.String);
 
                 Debug.Print(AddZIPFileNamesCommand.Parameters.Count.ToString());
 
-                DataTable dt = new DataTable(Properties.Resources.TableZIPFileName);
-                dt.Columns.Add("Id");
-                dt.Columns.Add("ZIPFileName");
+                //DataTable dt = new DataTable(Properties.Resources.TableZIPFileName);
+                //dt.Columns.Add("Id");
+                //dt.Columns.Add("ZIPFileName");
 
-                for (int i = 0; i < ZIPFileNames.Count; i++)                                    // add ZIP file names to DB
+                for (int i = 0; i < zipFileNames.Count; i++)                                    // add ZIP file names to DB
                 {
-                    dt.Rows.Add(new object[] { i, ZIPFileNames[i] });
+                    //dt.Rows.Add(new object[] { i, zipFileNames[i] });
+                    AddZIPFileNamesCommand.Parameters.AddWithValue("@Id", 1+i);
+                    AddZIPFileNamesCommand.Parameters.AddWithValue("@ZIPFileNames", zipFileNames[i]);
                 }
                 //AddZIPFileNamesCommand.CommandType = CommandType.StoredProcedure;
-                AddZIPFileNamesCommand.Parameters.AddWithValue("@ZIPFileNames", dt);
+                // AddZIPFileNamesCommand.Parameters.AddWithValue("@ZIPFileNames", dt);
                 AddZIPFileNamesCommand.ExecuteNonQuery();
 
                 //for (int i = 0; i < tempZipFileNamesOnline.Count; i++)                      // add ZIP file names to DB
