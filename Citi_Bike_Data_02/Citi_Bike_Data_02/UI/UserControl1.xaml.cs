@@ -27,19 +27,16 @@ namespace Citi_Bike_Data_02.UI
     /// </summary>
     public partial class UserControl1 : UserControl
     {
+
         #region ----PROPERTIES----
 
         public XDocument XMLDocument;
 
-        public List<string> ZIPFileNamesOnline
-        {
-            get { return ExtractZipFileList(); }
-        }
+        public List<string> ZIPFileNamesOnline;
 
-        public List<string> ZIPFileNamesDB
-        {
-            get { return GetZIPFileNamesFromDB(); }
-        }
+        public Dictionary<int, string> ZIPFileNamesDB;
+   
+
         #endregion
 
 
@@ -114,7 +111,10 @@ namespace Citi_Bike_Data_02.UI
             if (XMLDocument == null)
                 DownloadXMLFile();
 
-            GetZIPFileNamesFromDB();
+            ZIPFileNamesDB = GetZIPFileNamesFromDB();               // extract from db
+            ZIPFileNamesOnline = ExtractZipFileList();              // extract from xml file
+            // compare
+            // add new
         }
 
 
@@ -139,6 +139,7 @@ namespace Citi_Bike_Data_02.UI
 
         /// <summary>
         /// Download XML file from Amazon
+        /// Save data into XMLDocument property
         /// </summary>
         private void DownloadXMLFile()
         {
@@ -156,10 +157,10 @@ namespace Citi_Bike_Data_02.UI
                 // wc.DownloadFileAsync(new System.Uri(Properties.Resources.URLXML), localPath + "\\XMLDatat.XML");
                 string strXML = wc.DownloadString(Properties.Resources.URLXML);                 // get the xml string
 
-                if (string.IsNullOrEmpty(strXML))                                               // if the xml doc is blank
+                if (string.IsNullOrEmpty(strXML))                                               // if the xml doc is blank 
                 {
                     this.lbl_Status_01.Content = "Cannot access URL for XML data";
-                    return;
+                    return;                                                                     // exit function
                 }
 
                 XMLDocument = XDocument.Parse(strXML);                                          // parse the string into XML format
@@ -167,8 +168,8 @@ namespace Citi_Bike_Data_02.UI
                 lbl_Status_01.Content = "Downloaded XML Data";
             }
 
-            if (XMLDocument != null)
-                ExtractZipFileList();
+            //if (XMLDocument != null)
+            //    ExtractZipFileList();
 
             this.progressBar1.Value = 0;                                                        // reset progress bar (I think)
         }
@@ -202,33 +203,35 @@ namespace Citi_Bike_Data_02.UI
         /// Get list of ZIP file names from DB
         /// If list.count = 0, then there are no file names in the db table
         /// </summary>
+        /// <reference>https://stackoverflow.com/questions/15737425/reading-data-from-sql-database-table-to-generic-collection</reference>
         /// <returns>List of ZIP File names in the DB. If list.count = 0, there are no file names in the DB</returns>
-        private List<string> GetZIPFileNamesFromDB()
+        private Dictionary<int, string> GetZIPFileNamesFromDB()
         {
             using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))   // create a connection
             {
-                // List<string> tempZipFileNamesOnline = ZIPFileNamesOnline;
-                List<string> ZIPFileNamesDB = new List<string>();
+                Dictionary<int, string> ZIPFileNamesDB = new Dictionary<int, string>();
                 try
                 {
                     lbl_Status_01.Content = "Reading DB ZIP File Names";
                     string sql = "select * from " + Properties.Resources.TableZIPFileName;      // create query string
                     conn.Open();                                                                // open connection to db
                     SqlCommand sqlCommand = new SqlCommand(sql, conn);                          // sql command
-                    SqlDataReader reader = sqlCommand.ExecuteReader();
-
-                    Debug.Print(reader.FieldCount.ToString());
-                    lbl_Status_01.Content = "Number of ZIP File Names in DB: " + reader.FieldCount.ToString();
-
-                    if (reader.HasRows)                                                         // if there is data
+                    using (SqlDataReader reader = sqlCommand.ExecuteReader())
                     {
-                        while (reader.Read())
+
+                        Debug.Print(reader.FieldCount.ToString());
+                        lbl_Status_01.Content = "Number of ZIP File Names in DB: " + reader.FieldCount.ToString();
+
+                        if (reader.HasRows)                                                         // if there is data
                         {
-                            Debug.Print(reader["ZIPFileName"].ToString());
-                            // compare lists
+                            while (reader.Read())
+                            {
+                                Debug.Print(reader["ZIPFileName"].ToString());
+                                ZIPFileNamesDB.Add(Convert.ToInt32(reader["Id"]), reader["ZIPFileName"].ToString());
+                            }
                         }
+                        reader.Close();
                     }
-                    reader.Close();
                     conn.Close();
                 }
                 catch (Exception ex)
@@ -242,6 +245,11 @@ namespace Citi_Bike_Data_02.UI
             }
         }
 
+
+        private void CompareZIPFileNames()
+        {
+
+        }
 
         private void AddZIPFileNamesToDB(List<string> ZIPFileNames)
         {
