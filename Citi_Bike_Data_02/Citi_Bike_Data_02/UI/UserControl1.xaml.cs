@@ -117,6 +117,8 @@ namespace Citi_Bike_Data_02.UI
             List<string> tempZIPFileNames = CompareZIPFileNames(ZIPFileNamesOnline, ZIPFileNamesDB);  // compare
             if (tempZIPFileNames.Count > 0)
                 AddZIPFileNamesToDB(tempZIPFileNames);              // add new
+            else
+                lbl_Status_01.Content = "No new ZIP File Names to add";
         }
 
 
@@ -187,12 +189,17 @@ namespace Citi_Bike_Data_02.UI
             //                    where keys.Name.LocalName == "Key" && !keys.Value.Contains("JC")    // select the child nodes with zip files, excluding JC
             //                    select keys.Value;
 
-            var tempFileNames = from keys in xmlDocument.Descendants().ToList()                     // from all the nodes in the xml file
-                                where keys.Value.Contains(".zip") && !keys.Value.Contains("JC")    // select the child nodes with zip files, excluding JC
-                                select keys.Value;
+            //var tempFileNames = from keys in xmlDocument.Descendants().ToList()                     // from all the nodes in the xml file
+            //                    where keys.Value.Contains(".zip") && !keys.Value.Contains("JC")    // select the child nodes with zip files, excluding JC
+            //                    select keys.Value;
+
+            var tempFileNames = from key in xmlDocument.Descendants().ToList()                  // from all the nodes in the xml file
+                                where key.Name.LocalName == "Key"                               // select the nodes with the name of KEY
+                                where key.Value.Contains(".zip") && !key.Value.Contains("JC")   // select the ones with .zip in the name but ignore the ones with JC
+                                select key.Value;
 
             List<string> zipFileNamesOnline = new List<string>();
-            zipFileNamesOnline = tempFileNames.ToList();
+            zipFileNamesOnline = tempFileNames.ToList();                                        // save values to list
 
 #if DEBUG
             Debug.Print("Number of ZIP files in XML File: " + zipFileNamesOnline.Count);
@@ -302,7 +309,8 @@ namespace Citi_Bike_Data_02.UI
 
                 using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
                 {
-                    bulkCopy.DestinationTableName = Properties.Resources.TableZIPFileName;          
+                    bulkCopy.DestinationTableName = Properties.Resources.TableZIPFileName;
+                    lbl_Status_01.Content = "Added: " + numRows + " new ZIP file names to DB";
                     try
                     {
                         bulkCopy.WriteToServer(dt);                                                 // bulk copy data table to DB
