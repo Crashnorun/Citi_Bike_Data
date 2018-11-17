@@ -126,6 +126,9 @@
   <data name="ConnectionString" xml:space="preserve">
     <value>Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\cportelli\Documents\Personal\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True;Connect Timeout=30</value>
   </data>
+  <data name="TableZIPFileName" xml:space="preserve">
+    <value>ZIPFileNames</value>
+  </data>
   <data name="URLXML" xml:space="preserve">
     <value>https://s3.amazonaws.com/tripdata</value>
   </data>
