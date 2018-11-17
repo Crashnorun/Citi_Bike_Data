@@ -35,7 +35,7 @@ namespace Citi_Bike_Data_02.UI
         public List<string> ZIPFileNamesOnline;
 
         public Dictionary<int, string> ZIPFileNamesDB;
-   
+
 
         #endregion
 
@@ -59,6 +59,7 @@ namespace Citi_Bike_Data_02.UI
             SolidColorBrush fill = new SolidColorBrush(col);                                                    // create a solid brush
             this.progressBar1.Foreground = fill;                                                                // apply brush to progress bar
         }
+
 
         /// <summary>
         /// Test connection to DB
@@ -251,13 +252,14 @@ namespace Citi_Bike_Data_02.UI
         /// Compare the ZIPFileNamesOnline with ZIPFileNamesDB and return unique / new names 
         /// Remove any names in the Online list that already exist in the DB
         /// </summary>
+        /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlbulkcopy?redirectedfrom=MSDN&view=netframework-4.7.2</reference>
         /// <returns>Return only the list of unique names</returns>
         private List<string> CompareZIPFileNames(List<string> zipFileNamesOnline, Dictionary<int, string> zipFileNamesDB)
         {
             lbl_Status_01.Content = "Comparing ZIP File Names";
             List<string> tempZIPFileNames = new List<string>(zipFileNamesOnline);               // duplicate the list
 
-            foreach(string name in zipFileNamesDB.Values)                                       // cycle throught he dictionary
+            foreach (string name in zipFileNamesDB.Values)                                       // cycle throught he dictionary
             {
                 if (tempZIPFileNames.Contains(name))                                            // if name exists
                     tempZIPFileNames.Remove(name);                                              // remove it
@@ -266,6 +268,11 @@ namespace Citi_Bike_Data_02.UI
         }
 
 
+        /// <summary>
+        /// Write new ZIP File Names to DB
+        /// Bulk copy the new file names to the DB
+        /// </summary>
+        /// <param name="zipFileNames"></param>
         private void AddZIPFileNamesToDB(List<string> zipFileNames)
         {
             // create a connection string
@@ -274,53 +281,42 @@ namespace Citi_Bike_Data_02.UI
                 conn.Open();
                 lbl_Status_01.Content = "Writing ZIP File Names to DB: " + zipFileNames.Count;
 
+                int numRows = 0;
+                string sql = "select count (*) from " + Properties.Resources.TableZIPFileName;      // create query string
+                using (SqlCommand sqlCommand = new SqlCommand(sql, conn))                           // sql command
+                {
+                    numRows = (int)sqlCommand.ExecuteScalar();                                      // get number of exesting rows in db
+                    lbl_Status_01.Content = "Number of ZIP File Names in DB: " + numRows;
+                    Debug.Print("Number of existing rows: " + numRows);
+                }
+
                 SqlCommand AddZIPFileNamesCommand = new SqlCommand("Insert into " + Properties.Resources.TableZIPFileName +
                                     " (Id, ZIPFileName) Values (@Id, @ZIPFileName)", conn);
-                //AddZIPFileNamesCommand.Parameters.Add("@Id", DbType.Int32);
-               // AddZIPFileNamesCommand.Parameters.Add("@ZIPFileName", DbType.String);
 
-                Debug.Print(AddZIPFileNamesCommand.Parameters.Count.ToString());
+                DataTable dt = new DataTable(Properties.Resources.TableZIPFileName);                // create a temporary datatable
+                dt.Columns.Add("Id");                                                               // assign the same column names
+                dt.Columns.Add("ZIPFileName");
 
-                //DataTable dt = new DataTable(Properties.Resources.TableZIPFileName);
-                //dt.Columns.Add("Id");
-                //dt.Columns.Add("ZIPFileName");
+                for (int i = 0; i < zipFileNames.Count; i++)                                        // add ZIP file names to data table
+                    dt.Rows.Add(new object[] { i + numRows, zipFileNames[i] });
 
-                for (int i = 0; i < zipFileNames.Count; i++)                                    // add ZIP file names to DB
+                using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
                 {
-                    //dt.Rows.Add(new object[] { i, zipFileNames[i] });
-                    AddZIPFileNamesCommand.Parameters.AddWithValue("@Id", 1+i);
-                    AddZIPFileNamesCommand.Parameters.AddWithValue("@ZIPFileNames", zipFileNames[i]);
+                    bulkCopy.DestinationTableName = Properties.Resources.TableZIPFileName;          
+                    try
+                    {
+                        bulkCopy.WriteToServer(dt);                                                 // bulk copy data table to DB
+                    }
+                    catch (Exception ex)
+                    {
+                        lbl_Status_01.Content = "Unable to insert new ZIPFileNames into DB" + Environment.NewLine + ex.Message;
+                        Debug.Print(ex.Message);
+                    }
                 }
-                //AddZIPFileNamesCommand.CommandType = CommandType.StoredProcedure;
-                // AddZIPFileNamesCommand.Parameters.AddWithValue("@ZIPFileNames", dt);
-                AddZIPFileNamesCommand.ExecuteNonQuery();
 
-                //for (int i = 0; i < tempZipFileNamesOnline.Count; i++)                      // add ZIP file names to DB
-                //{
-                //    AddZIPFileNamesCommand.Parameters[0].Value = i;
-                //    AddZIPFileNamesCommand.Parameters[1].Value = tempZipFileNamesOnline[i];
-
-                //    AddZIPFileNamesCommand.ExecuteNonQuery();
-                //}
-
-                // AddZIPFileNamesCommand.Parameters.Clear();
                 conn.Close();
-#if DEBUG
                 Debug.Print("Writinging DB ZIP File Names");
-#endif
             }
-
-
-
-
-
-
-
-
-
-
-
-
         }
 
         #endregion
