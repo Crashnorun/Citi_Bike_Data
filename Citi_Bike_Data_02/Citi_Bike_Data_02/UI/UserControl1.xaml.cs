@@ -55,9 +55,18 @@ namespace Citi_Bike_Data_02.UI
             InitializeComponent();
 
             lbl_Status_01.Content = string.Empty;
+            lbl_Status_01.ToolTip = lbl_Status_01.Content;
             Color col = (Color)ColorConverter.ConvertFromString(Properties.Resources.CitiBikeColorHEX);         // get color from properties
             SolidColorBrush fill = new SolidColorBrush(col);                                                    // create a solid brush
             this.progressBar1.Foreground = fill;                                                                // apply brush to progress bar
+
+            // HelperDB.HelperDB.CreateNewDB("TestDB");
+            //bool exists = HelperDB.HelperDB.CheckIfDBExists("Charlie");
+            //if (!exists)
+            //{
+            //    HelperDB.HelperDB.CreateNewDB("Charlie");
+            //}
+            //Debug.Print(exists.ToString());
         }
 
 
@@ -68,7 +77,15 @@ namespace Citi_Bike_Data_02.UI
         /// <param name="e"></param>
         private void btn_CreateDB_Click(object sender, RoutedEventArgs e)
         {
-            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
+            string DBFilePath = HelperDB.HelperDB.CheckIfDBExists(Properties.Resources.DBName);
+            if (DBFilePath == false.ToString().ToLower())
+                HelperDB.HelperDB.CreateNewDB(Properties.Resources.DBName);
+                
+            
+
+
+
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))
             {
                 try
                 {
@@ -81,6 +98,8 @@ namespace Citi_Bike_Data_02.UI
                 catch (SqlException ex)
                 {
                     lbl_Status_01.Content = "Unable to establish connection to DB" + ex.Message;
+                    txtBlock.Text = ex.Message;
+                    txtBlock.TextWrapping = TextWrapping.Wrap;
 #if DEBUG
                     Debug.Print("CANNOT Established DB Connection");
 #endif
@@ -216,7 +235,7 @@ namespace Citi_Bike_Data_02.UI
         /// <returns>List of ZIP File names in the DB. If list.count = 0, there are no file names in the DB</returns>
         private Dictionary<int, string> GetZIPFileNamesFromDB()
         {
-            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))   // create a connection
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))   // create a connection
             {
                 Dictionary<int, string> zipFileNamesDB = new Dictionary<int, string>();
                 try
@@ -283,7 +302,7 @@ namespace Citi_Bike_Data_02.UI
         private void AddZIPFileNamesToDB(List<string> zipFileNames)
         {
             // create a connection string
-            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))   // create a connection
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))   // create a connection
             {
                 conn.Open();
                 lbl_Status_01.Content = "Writing ZIP File Names to DB: " + zipFileNames.Count;

@@ -8,7 +8,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <ProgressBar x:Name="progressBar1" Margin="10,0,10,10" Height="10" VerticalAlignment="Bottom" Foreground="#FF06B03C" Background="#FFF7F7F7" BorderBrush="#FFF7F7F7"/>
-        <Label x:Name="lbl_Status_01" Content="Label" Margin="10,0,10,20" Height="26" VerticalAlignment="Bottom"/>
+        <Label x:Name="lbl_Status_01" Content="Label" Margin="10,0,10,20" Height="92" VerticalAlignment="Bottom"/>
         <Button x:Name="btn_ConnectDB" Content="Connect To DB" 
                 HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="149" 
                 Click="btn_CreateDB_Click" BorderBrush="{x:Null}"
@@ -20,5 +20,6 @@
                 ToolTip="Download XML from AWS" ToolTipService.ShowDuration="5000" Background="#FFE2EEFF">
         </Button>
         <Button x:Name="btn_CompareZipFiles" Content="Compare ZIP File Names" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top" Width="149" BorderBrush="{x:Null}" Height="26" Click="btn_CompareZipFiles_Click" Background="#FFE2EEFF"/>
+        <TextBlock x:Name="txtBlock" Margin="10,216,10,117" TextWrapping="Wrap" Text="TextBlock" RenderTransformOrigin="-1.286,2.782"/>
     </Grid>
 </UserControl>
