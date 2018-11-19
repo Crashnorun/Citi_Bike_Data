@@ -79,7 +79,7 @@ namespace Citi_Bike_Data_02.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data Source=(LocalDB)\\MSSQLLocalDB; database=master; Integrated security=True;.
+        ///   Looks up a localized string similar to Data Source=(LocalDB)\MSSQLLocalDB; database=master; Integrated security=True;.
         /// </summary>
         internal static string ConnectionStringBase {
             get {

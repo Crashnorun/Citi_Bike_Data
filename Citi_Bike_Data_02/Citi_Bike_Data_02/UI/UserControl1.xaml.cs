@@ -59,14 +59,6 @@ namespace Citi_Bike_Data_02.UI
             Color col = (Color)ColorConverter.ConvertFromString(Properties.Resources.CitiBikeColorHEX);         // get color from properties
             SolidColorBrush fill = new SolidColorBrush(col);                                                    // create a solid brush
             this.progressBar1.Foreground = fill;                                                                // apply brush to progress bar
-
-            // HelperDB.HelperDB.CreateNewDB("TestDB");
-            //bool exists = HelperDB.HelperDB.CheckIfDBExists("Charlie");
-            //if (!exists)
-            //{
-            //    HelperDB.HelperDB.CreateNewDB("Charlie");
-            //}
-            //Debug.Print(exists.ToString());
         }
 
 
@@ -82,9 +74,6 @@ namespace Citi_Bike_Data_02.UI
                 HelperDB.HelperDB.CreateNewDB(Properties.Resources.DBName);
                 
             
-
-
-
             using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))
             {
                 try

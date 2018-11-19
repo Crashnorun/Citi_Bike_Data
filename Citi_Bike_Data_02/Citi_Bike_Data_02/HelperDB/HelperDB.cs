@@ -16,52 +16,68 @@ namespace Citi_Bike_Data_02.HelperDB
         static string DBFilePath;
         static string DBConnectionString;
 
-
+        /// <summary>
+        /// Create a new DB
+        /// </summary>
+        /// <param name="DBName">Required DB File name</param>
+        /// <returns>DB connection string on success; Null on failure</returns>
         public static string CreateNewDB(string DBName)
         {
+            #region ---NOTES----
             // Executing assembly path => C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\bin\Debug
             // DB Connection String => Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True;Connect Timeout=30
             //string connectionStringBase = "Data Source=(LocalDB)\\MSSQLLocalDB; database=master; Integrated security=True;";
-            //string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB; database=master; Integrated security=True;";
+            #endregion
 
-            string connectionString = string.Empty;
-            SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase);      // create connection
-            if (conn.State == System.Data.ConnectionState.Open)                                     // check if it's open
-                conn.Close();
-
-            string path = GetExecutingAssemblyPath() + "\\" + DBName;                               // construct new DB file path
+            #region ----NOTES ----
             //string creationString = "CREATE DATABASE IF NOT EXISTS " + DBName + ";";
             //string creationString = "CREATE DATABASE IF NOT EXISTS " + DBName + "; ON PRIMARY ";// +
             //string creationString = "CREATE DATABASE " + DBName + "; ON PRIMARY ";// +
-            string creationString = "CREATE DATABASE " + DBName + ";";// +                          // SQL Create DB Command
-                                                                      // "FILENAME = '" + path + ".mdf'";
-                                                                      //"(NAME = " + DBName + ", " +
-                                                                      //"FILENAME = '" + path + ".mdf')"; 
-                                                                      //"SIZE = 2MB, MAXSIZE = 10MB, FILEGROWTH = 10%) " +
-                                                                      //"LOG ON (NAME = MyDatabase_Log, " +
-                                                                      //"FILENAME = 'C:\\MyDatabaseLog.ldf', " +
-                                                                      //"SIZE = 1MB, " +
-                                                                      //"MAXSIZE = 5MB, " +
-                                                                      //"FILEGROWTH = 10%)";
+            // "FILENAME = '" + path + ".mdf'";
+            //"(NAME = " + DBName + ", " +
+            //"FILENAME = '" + path + ".mdf')"; 
+            //"SIZE = 2MB, MAXSIZE = 10MB, FILEGROWTH = 10%) " +
+            //"LOG ON (NAME = MyDatabase_Log, " +
+            //"FILENAME = 'C:\\MyDatabaseLog.ldf', " +
+            //"SIZE = 1MB, " +
+            //"MAXSIZE = 5MB, " +
+            //"FILEGROWTH = 10%)";
+            #endregion
 
+            string connectionString = string.Empty;
+            string dbFilePath = string.Empty;
+#if DEBUG
+            dbFilePath = Environment.CurrentDirectory + "\\" + DBName;                                      // construct new DB file path
+#else
+            dbFilePath = GetExecutingAssemblyPath() + "\\" + DBName;                                        // construct new DB file path
+#endif
+            string creationCmd = "CREATE DATABASE " + DBName + ";";                                         // SQL Create DB Command
 
-            SqlCommand creationCMD = new SqlCommand(creationString, conn);                          // SQL command
-
-            try
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase))       // create connection
             {
-                conn.Open();
-                int num = creationCMD.ExecuteNonQuery();
-                Debug.Print("DB creation return value: " + num.ToString());
-                connectionString = Properties.Resources.ConnectionStringBase + ";AttachDbFilename=" + path + ".mdf;";
-                DBConnectionString = connectionString;
-                DBFilePath = path;
-            }
-            catch (System.Exception ex)
-            {
-                Debug.Print("Cannot create DB: " + Environment.NewLine + ex.Message);
-            }
+                if (conn.State == System.Data.ConnectionState.Open)                                         // check if it's open
+                    conn.Close();
 
-            conn.Close();
+                SqlCommand creationCMD = new SqlCommand(creationCmd, conn);                                 // SQL command
+
+                try
+                {
+                    conn.Open();                                                                            // open connection
+                    int num = creationCMD.ExecuteNonQuery();                                                // execute sql command
+                    Debug.Print("DB creation return value: " + num.ToString());
+                    connectionString = Properties.Resources.ConnectionStringBase + ";AttachDbFilename=" + dbFilePath + ".mdf;";
+                    DBConnectionString = connectionString;
+                    DBFilePath = dbFilePath;
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.Print("Cannot create DB " + Environment.NewLine + ex.Message);
+
+                }
+
+                conn.Close();
+            }
+              
             return connectionString;
         }
 
@@ -82,11 +98,12 @@ namespace Citi_Bike_Data_02.HelperDB
 
 
         /// <summary>
-        /// Check if the DB exists. Need to check in two locations:
-        /// 1. Relase configuration
-        /// 2. Debug configuration
-        /// Return false if DB does not exist
+        /// Check if the DB exists. Function checks in two locations:
+        /// 1. Relase configuration (at executing assembly)
+        /// 2. Debug configuration (in project diretory)
+        /// Return false (as string) if DB does not exist
         /// </summary>
+        /// <reference>https://stackoverflow.com/questions/816566/how-do-you-get-the-current-project-directory-from-c-sharp-code-when-creating-a-c</reference>
         /// <returns>False = DB does not exist, or the file path were the db is located</returns>
         public static string CheckIfDBExists(string DBName)
         {
