@@ -42,7 +42,7 @@ namespace Citi_Bike_Data_02.UI
 
         #region ----FIELDS----
 
-
+        private string lblMessage = string.Empty;
 
 
         #endregion
@@ -50,6 +50,9 @@ namespace Citi_Bike_Data_02.UI
 
         #region ----UI----
 
+        /// <summary>
+        /// Set progress bar color
+        /// </summary>
         public UserControl1()
         {
             InitializeComponent();
@@ -71,31 +74,35 @@ namespace Citi_Bike_Data_02.UI
         {
             string DBFilePath = HelperDB.HelperDB.CheckIfDBExists(Properties.Resources.DBName);
             if (DBFilePath == false.ToString().ToLower())
-                HelperDB.HelperDB.CreateNewDB(Properties.Resources.DBName);
-                
-            
-            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))
             {
-                try
-                {
-                    conn.Open();                                                                // open connection to db
-                    lbl_Status_01.Content = "Established connection to DB";
-#if DEBUG
-                    Debug.Print("Established DB Connection");
-#endif
-                }
-                catch (SqlException ex)
-                {
-                    lbl_Status_01.Content = "Unable to establish connection to DB" + ex.Message;
-                    txtBlock.Text = ex.Message;
-                    txtBlock.TextWrapping = TextWrapping.Wrap;
-#if DEBUG
-                    Debug.Print("CANNOT Established DB Connection");
-#endif
-                }
-                if (conn != null && conn.State == System.Data.ConnectionState.Open)
-                    conn.Close();                                                               // close connection
+                HelperDB.HelperDB.CreateNewDB(Properties.Resources.DBName, ref lblMessage);
+                lbl_Status_01.Content = lblMessage;
             }
+
+            #region ----NOTES----
+            //            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))
+            //            {
+            //                try
+            //                {
+            //                    conn.Open();                                                                // open connection to db
+            //                    lbl_Status_01.Content = "Established connection to DB";
+            //#if DEBUG
+            //                    Debug.Print("Established DB Connection");
+            //#endif
+            //                }
+            //                catch (SqlException ex)
+            //                {
+            //                    lbl_Status_01.Content = "Unable to establish connection to DB" + ex.Message;
+            //                    txtBlock.Text = ex.Message;
+            //                    txtBlock.TextWrapping = TextWrapping.Wrap;
+            //#if DEBUG
+            //                    Debug.Print("CANNOT Established DB Connection");
+            //#endif
+            //                }
+            //                if (conn != null && conn.State == System.Data.ConnectionState.Open)
+            //                    conn.Close();                                                               // close connection
+            //            }
+            #endregion
         }
 
 
