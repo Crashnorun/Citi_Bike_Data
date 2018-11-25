@@ -53,8 +53,8 @@ namespace Citi_Bike_Data_02.HelperDB
             //string creationCmd = "CREATE DATABASE " + DBName + ";";                                       // SQL Create DB Command
             string creationCmd = "CREATE DATABASE " + DBName + " ON PRIMARY " +                             // SQL Create DB Command
                 "(NAME = " + DBName + ", " +
-                "FILENAME = '" + dbFilePath +".mdf')";
-        
+                "FILENAME = '" + dbFilePath + ".mdf')";
+
             using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase))       // create connection
             {
                 if (conn.State == System.Data.ConnectionState.Open)                                         // check if it's open
@@ -167,13 +167,44 @@ namespace Citi_Bike_Data_02.HelperDB
         /// </summary>
         /// <param name="DBName">DB Name</param>
         /// <param name="TableName">Table Name</param>
-        /// <param name="CreateTable">Create table? Default is ot noe create the table</param>
-        /// <returns>FALSE (as string) if table does not exist, TRUE (as string) if tabel does exist</returns>
-        public static string CheckIfTableExists(string DBName, string TableName, bool CreateTable = false)
+        /// <returns>FALSE if table does not exist, TRUE if tabel does exist</returns>
+        public static bool CheckIfTableExists(string ConnectionString, string DBName, string TableName)
         {
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                if (conn.State != System.Data.ConnectionState.Open)                             // check if it's open
+                    conn.Open();
+                try
+                {
+                    string command = @"IF EXISTS(SELECT * " + DBName + ".TABLES " +             // create query string to check if table exists
+                       "WHERE TABLE_NAME='" + TableName + "') SELECT 1 ELSE SELECT 0";
+                    conn.Open();
+                    SqlCommand TableCheck = new SqlCommand(command, conn);                      // create query command to check if table exists
 
-            return null;
+                    int x = Convert.ToInt32(TableCheck.ExecuteScalar());                        // execute query
+                    conn.Close();                                                               // close connection
+
+                    if (x == 1)
+                    {
+                        Debug.Print("Table exists: " + TableName);
+                        return true;
+                    }
+                    else
+                    {
+                        Debug.Print("Table doesn't exist: " + TableName);
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    conn.Close();                                                               // close connection
+                    Debug.Print("Couldn't not identify if " + TableName + " exists in DB" +
+                        Environment.NewLine + ex.Message);
+                }
+                return false;
+            }
         }
+
 
     }           // close class
 }               // close namespace

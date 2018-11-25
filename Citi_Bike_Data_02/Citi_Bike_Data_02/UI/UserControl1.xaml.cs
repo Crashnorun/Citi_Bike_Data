@@ -137,6 +137,13 @@ namespace Citi_Bike_Data_02.UI
         }
 
 
+        private void btn_CreateTable_Click(object sender, RoutedEventArgs e)
+        {
+            // check if table exist
+            // create table
+        }
+
+
         void ProgressBarChanged(object sender, EventArgs e)
         {
             try
@@ -342,8 +349,8 @@ namespace Citi_Bike_Data_02.UI
             }
         }
 
-        #endregion
 
+        #endregion
 
     }           // close class
 }               // close namespace
