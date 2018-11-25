@@ -162,6 +162,7 @@ namespace Citi_Bike_Data_02.HelperDB
             }
         }
 
+
         /// <summary>
         /// Check if a table exists in a DB
         /// </summary>
@@ -205,6 +206,45 @@ namespace Citi_Bike_Data_02.HelperDB
             }
         }
 
+
+        /// <summary>
+        /// Convert dictionary of C# types to dictionary of SQL types
+        /// </summary>
+        /// <param name="ColumnNames">Dictionary containing column names (as string) and C# variable types (as Type)</param>
+        /// <returns>Dictionary containing column names (as string) and SQL variable types (as string)</returns>
+        public static Dictionary<string, string> ConvertToSQLTypes(Dictionary<string, Type> ColumnNames)
+        {
+            Dictionary<string, string> NewColumNames = new Dictionary<string, string>();        // create new dictonary
+
+            foreach (KeyValuePair<string, Type> pair in ColumnNames)
+            {
+                if (pair.Value == typeof(string))
+                {
+                    NewColumNames.Add(pair.Key, "text");
+                }
+                else if (pair.Value == typeof(int))
+                {
+                    NewColumNames.Add(pair.Key, "int");
+                }
+                else if (pair.Value == typeof(double))
+                {
+                    NewColumNames.Add(pair.Key, "double");
+                }
+                else if (pair.Value == typeof(DateTime))
+                {
+                    NewColumNames.Add(pair.Key, "datetime");
+                }
+                else if (pair.Value == typeof(bool))
+                {
+                    NewColumNames.Add(pair.Key, "text");
+                }
+                else
+                {
+                    NewColumNames.Add(pair.Key, "text");
+                }
+            }
+            return NewColumNames;
+        }
 
     }           // close class
 }               // close namespace
