@@ -20,11 +20,12 @@ namespace Citi_Bike_Data_02.HelperDB
         /// Create a new DB in the locatio nof the executing assembly
         /// </summary>
         /// <param name="DBName">Required DB File name</param>
+        /// <reference>https://support.microsoft.com/en-us/help/307283/how-to-create-a-sql-server-database-programmatically-by-using-ado-net</reference>
         /// <returns>DB connection string on success; Null on failure</returns>
         public static string CreateNewDB(string DBName, ref string message)
         {
             #region ---NOTES----
-            
+
             // Executing assembly path => C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\bin\Debug
             // DB Connection String when db is manually created => Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True;Connect Timeout=30
             // DB Connection string when db is programatacally created =>"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\cportelli\Documents\Personal\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\bin\\Debug\CitiBikeData.mdf;Integrated security=True;database=master;"
@@ -49,8 +50,11 @@ namespace Citi_Bike_Data_02.HelperDB
 
             string connectionString = string.Empty;
             string dbFilePath = Environment.CurrentDirectory + "\\" + DBName;                               // construct new DB file path
-            string creationCmd = "CREATE DATABASE " + DBName + ";";                                         // SQL Create DB Command
-
+            //string creationCmd = "CREATE DATABASE " + DBName + ";";                                       // SQL Create DB Command
+            string creationCmd = "CREATE DATABASE " + DBName + " ON PRIMARY " +                             // SQL Create DB Command
+                "(NAME = " + DBName + ", " +
+                "FILENAME = '" + dbFilePath +".mdf')";
+        
             using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase))       // create connection
             {
                 if (conn.State == System.Data.ConnectionState.Open)                                         // check if it's open
@@ -82,7 +86,7 @@ namespace Citi_Bike_Data_02.HelperDB
 
         public static void CreateNewTable(string TableName, string ConnectionString, Dictionary<string, Type> ColumnNames, ref string message)
         {
-            using(SqlConnection conn = new SqlConnection(ConnectionString))
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 try
                 {
@@ -95,7 +99,7 @@ namespace Citi_Bike_Data_02.HelperDB
                     columnString = columnString.TrimEnd(',');
 
                     using (SqlCommand command = new SqlCommand("If not exists (" + TableName + ")" +
-                        "begin create table " + TableName + "(" + columnString + "); end")) 
+                        "begin create table " + TableName + "(" + columnString + "); end"))
                     {
                         command.ExecuteNonQuery();
                         Debug.Print("Added " + TableName + " table to DB" + Environment.NewLine);
@@ -158,6 +162,18 @@ namespace Citi_Bike_Data_02.HelperDB
             }
         }
 
+        /// <summary>
+        /// Check if a table exists in a DB
+        /// </summary>
+        /// <param name="DBName">DB Name</param>
+        /// <param name="TableName">Table Name</param>
+        /// <param name="CreateTable">Create table? Default is ot noe create the table</param>
+        /// <returns>FALSE (as string) if table does not exist, TRUE (as string) if tabel does exist</returns>
+        public static string CheckIfTableExists(string DBName, string TableName, bool CreateTable = false)
+        {
+
+            return null;
+        }
 
     }           // close class
 }               // close namespace
