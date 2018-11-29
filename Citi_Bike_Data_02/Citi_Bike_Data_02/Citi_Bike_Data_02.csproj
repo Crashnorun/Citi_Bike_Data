@@ -52,6 +52,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -70,6 +71,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Classes\cls_CSVFile.cs" />
+    <Compile Include="Classes\cls_ZIPFile.cs" />
     <Compile Include="HelperDB\HelperDB.cs" />
     <Compile Include="UI\UserControl1.xaml.cs">
       <DependentUpon>UserControl1.xaml</DependentUpon>

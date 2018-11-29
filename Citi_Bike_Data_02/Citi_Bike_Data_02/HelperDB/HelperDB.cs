@@ -17,7 +17,7 @@ namespace Citi_Bike_Data_02.HelperDB
         static string DBConnectionString;
 
         /// <summary>
-        /// Create a new DB in the locatio nof the executing assembly
+        /// Create a new DB in the location of the executing assembly
         /// </summary>
         /// <param name="DBName">Required DB File name</param>
         /// <reference>https://support.microsoft.com/en-us/help/307283/how-to-create-a-sql-server-database-programmatically-by-using-ado-net</reference>
@@ -31,21 +31,6 @@ namespace Citi_Bike_Data_02.HelperDB
             // DB Connection string when db is programatacally created =>"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\cportelli\Documents\Personal\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\bin\\Debug\CitiBikeData.mdf;Integrated security=True;database=master;"
             //string connectionStringBase = "Data Source=(LocalDB)\\MSSQLLocalDB; database=master; Integrated security=True;";
 
-            #endregion
-
-            #region ----NOTES ----
-            //string creationString = "CREATE DATABASE IF NOT EXISTS " + DBName + ";";
-            //string creationString = "CREATE DATABASE IF NOT EXISTS " + DBName + "; ON PRIMARY ";// +
-            //string creationString = "CREATE DATABASE " + DBName + "; ON PRIMARY ";// +
-            // "FILENAME = '" + path + ".mdf'";
-            //"(NAME = " + DBName + ", " +
-            //"FILENAME = '" + path + ".mdf')"; 
-            //"SIZE = 2MB, MAXSIZE = 10MB, FILEGROWTH = 10%) " +
-            //"LOG ON (NAME = MyDatabase_Log, " +
-            //"FILENAME = 'C:\\MyDatabaseLog.ldf', " +
-            //"SIZE = 1MB, " +
-            //"MAXSIZE = 5MB, " +
-            //"FILEGROWTH = 10%)";
             #endregion
 
             string connectionString = string.Empty;
@@ -119,7 +104,7 @@ namespace Citi_Bike_Data_02.HelperDB
         /// Find the executing assembly folder path 
         /// </summary>
         /// <returns>Executing assembly folder path</returns>
-        private static string GetExecutingAssemblyPath()
+        public static string GetExecutingAssemblyPath()
         {
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;                         // path in URI format
             UriBuilder uri = new UriBuilder(codeBase);
