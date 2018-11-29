@@ -19,12 +19,12 @@ using System.Xml.Linq;
 using System.Xml;
 using System.Diagnostics;
 using System.Data;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
 
 namespace Citi_Bike_Data_02.UI
 {
-    /// <summary>
-    /// Interaction logic for UserControl1.xaml
-    /// </summary>
+    
     public partial class UserControl1 : UserControl
     {
 
@@ -105,9 +105,19 @@ namespace Citi_Bike_Data_02.UI
             #endregion
         }
 
+        //private IInvokeProvider Invoke(object sender, RoutedEventArgs e)
+        //{
+        //    var i = 100;
+        //    return null;
+        //}
+
 
         private void btn_CreateTable_Click(object sender, RoutedEventArgs e)
         {
+            //ButtonAutomationPeer peer = new ButtonAutomationPeer(btn_ConnectDB);
+            //IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+            //invokeProv.Invoke();                    // click the "create db" button
+
             // check if table exist
             bool test = HelperDB.HelperDB.CheckIfTableExists(Properties.Resources.ConnectionStringBase, Properties.Resources.DBName, "Charlie");
 
@@ -122,7 +132,6 @@ namespace Citi_Bike_Data_02.UI
                 ColumnNames.Add("double", typeof(double));
 
                 HelperDB.HelperDB.CreateNewTable("Charlie", Properties.Resources.ConnectionStringBase, ColumnNames, ref message);   // create table
-
                 
             }
         }

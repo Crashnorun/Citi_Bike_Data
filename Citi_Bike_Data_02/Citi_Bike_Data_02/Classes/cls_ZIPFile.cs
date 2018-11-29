@@ -62,7 +62,8 @@ namespace Citi_Bike_Data_02.Classes
 
             foreach (string filePath in FilePaths)                                              // save .CSV files
             {
-                var folders = filePath.Split(new List<char>({'\\'});
+                var folders = filePath.Split('\\');
+
                 if (folders[folders.Length - 1].ToLower().Contains(".csv"))
                     FileNames.Add(folders[folders.Length - 1].ToLower());
             }

@@ -38,7 +38,7 @@ namespace Citi_Bike_Data_02.HelperDB
             //string creationCmd = "CREATE DATABASE " + DBName + ";";                                       // SQL Create DB Command
             string creationCmd = "CREATE DATABASE " + DBName + " ON PRIMARY " +                             // SQL Create DB Command
                 "(NAME = " + DBName + ", " +
-                "FILENAME = '" + dbFilePath + ".mdf')";
+                "FILENAME = " + dbFilePath + ".mdf)";
 
             using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase))       // create connection
             {
