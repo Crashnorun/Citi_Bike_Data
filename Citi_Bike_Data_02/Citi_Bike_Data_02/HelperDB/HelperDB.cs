@@ -79,12 +79,14 @@ namespace Citi_Bike_Data_02.HelperDB
                         conn.Open();
 
                     string columnString = string.Empty;
-                    foreach (string name in ColumnNames.Keys)
-                        columnString += name + " " + ColumnNames[name].ToString() + ",";        // compile column names and data types
+                    Dictionary<string, string> SQLColumns = ConvertToSQLTypes(ColumnNames);
+
+                    foreach (string name in SQLColumns.Keys)
+                        columnString += name + " " + SQLColumns[name].ToLower() + ",";        // compile column names and data types
                     columnString = columnString.TrimEnd(',');
 
                     using (SqlCommand command = new SqlCommand("If not exists (" + TableName + ")" +
-                        "begin create table " + TableName + "(" + columnString + "); end"))
+                        "begin create table " + TableName + "(" + columnString + "); end",conn))
                     {
                         command.ExecuteNonQuery();
                         Debug.Print("Added " + TableName + " table to DB" + Environment.NewLine);
@@ -230,6 +232,45 @@ namespace Citi_Bike_Data_02.HelperDB
             }
             return NewColumNames;
         }
+
+
+        public static void CreateZIPTable()
+        {
+            // check if table exists
+            bool test = CheckIfTableExists(Properties.Resources.ConnectionStringBase, Properties.Resources.DBName,
+               Properties.Resources.TableZIPFileName);
+
+            if (!test)                                                                          // if table doesn't exist
+            {
+                string message = string.Empty;
+
+                Dictionary<string, Type> ColumnNames = new Dictionary<string, Type>();
+                Classes.cls_ZIPFile zipFile = new Classes.cls_ZIPFile();                        // create temporary object
+                ColumnNames = zipFile.GetType().GetProperties().ToDictionary(prop => prop.Name, prop => prop.PropertyType);                     // convert object properties to dictionary
+
+                CreateNewTable(Properties.Resources.TableZIPFileName, Properties.Resources.ConnectionStringBase, ColumnNames, ref message);     // create table
+            }
+        }
+
+
+        public static void CreateCSVTable()
+        {
+            // check if table exists
+            bool test = CheckIfTableExists(Properties.Resources.ConnectionStringBase, Properties.Resources.DBName,
+               Properties.Resources.TableCSVFileName);
+
+            if (!test)                                                                          // if table doesn't exist
+            {
+                string message = string.Empty;
+
+                Dictionary<string, Type> ColumnNames = new Dictionary<string, Type>();
+                Classes.cls_CSVFile csvFile = new Classes.cls_CSVFile();
+                ColumnNames = csvFile.GetType().GetProperties().ToDictionary(prop => prop.Name, prop => prop.PropertyType);                     // convert object properties to dictionary
+
+                CreateNewTable(Properties.Resources.TableCSVFileName, Properties.Resources.ConnectionStringBase, ColumnNames, ref message);     // create table
+            }
+        }
+
 
     }           // close class
 }               // close namespace

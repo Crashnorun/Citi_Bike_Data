@@ -9,14 +9,15 @@ using System.IO;
 
 namespace Citi_Bike_Data_02.Classes
 {
+    [Serializable]
     public class cls_ZIPFile
     {
 
         #region ----PROPERTIES----
 
-        public string ZIPFileName;
-        public List<string> CSVFileNames = new List<string>();
-        public string FullFolderPath;
+        public string ZIPFileName { get; set; }
+        public List<string> CSVFileNames { get; set; }
+        public string FullFolderPath { get; set; }
 
         #endregion
 

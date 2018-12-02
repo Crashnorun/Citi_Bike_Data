@@ -132,21 +132,8 @@ namespace Citi_Bike_Data_02.UI
             //invokeProv.Invoke();                    // click the "create db" button
 
             // check if table exist
-            bool test = HelperDB.HelperDB.CheckIfTableExists(Properties.Resources.ConnectionStringBase, Properties.Resources.DBName, "Charlie");
-
-            if (!test)                                                                          // if table doesn't exist
-            {
-                string message = string.Empty;
-                Dictionary<string, Type> ColumnNames = new Dictionary<string, Type>();
-                ColumnNames.Add("FirstName", typeof(string));
-                ColumnNames.Add("LastName", typeof(string));
-                ColumnNames.Add("b'date", typeof(DateTime));
-                ColumnNames.Add("age", typeof(int));
-                ColumnNames.Add("double", typeof(double));
-
-                HelperDB.HelperDB.CreateNewTable("Charlie", Properties.Resources.ConnectionStringBase, ColumnNames, ref message);   // create table
-
-            }
+            HelperDB.HelperDB.CreateZIPTable();
+            HelperDB.HelperDB.CreateCSVTable();
         }
 
 
