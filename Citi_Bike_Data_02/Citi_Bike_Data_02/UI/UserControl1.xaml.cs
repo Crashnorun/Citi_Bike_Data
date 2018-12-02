@@ -24,7 +24,7 @@ using System.Windows.Automation.Provider;
 
 namespace Citi_Bike_Data_02.UI
 {
-    
+
     public partial class UserControl1 : UserControl
     {
 
@@ -75,6 +75,18 @@ namespace Citi_Bike_Data_02.UI
             string DBFilePath = HelperDB.HelperDB.CheckIfDBExists(Properties.Resources.DBName);
             if (DBFilePath == false.ToString().ToLower())
             {
+                // check connection
+                using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase))       // create connection
+                {
+                    if (conn.State == System.Data.ConnectionState.Open)                                         // check if it's open
+                    {
+                        Debug.Print("DB Name: " + conn.Database);
+                        Debug.Print("DB Data Source: " + conn.DataSource);
+                        conn.Close();
+                    }
+                }
+
+
                 HelperDB.HelperDB.CreateNewDB(Properties.Resources.DBName, ref lblMessage);
                 lbl_Status_01.Content = lblMessage;
             }
@@ -105,6 +117,7 @@ namespace Citi_Bike_Data_02.UI
             #endregion
         }
 
+
         //private IInvokeProvider Invoke(object sender, RoutedEventArgs e)
         //{
         //    var i = 100;
@@ -132,7 +145,7 @@ namespace Citi_Bike_Data_02.UI
                 ColumnNames.Add("double", typeof(double));
 
                 HelperDB.HelperDB.CreateNewTable("Charlie", Properties.Resources.ConnectionStringBase, ColumnNames, ref message);   // create table
-                
+
             }
         }
 
