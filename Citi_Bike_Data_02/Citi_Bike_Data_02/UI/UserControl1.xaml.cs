@@ -200,7 +200,7 @@ namespace Citi_Bike_Data_02.UI
             if (HelperDB.HelperDB.GetNumberOfTables(ConnectionString) == 0)
             {
                 HelperDB.HelperDB.CreateZIPTable(ConnectionString);
-                HelperDB.HelperDB.CreateCSVTable();
+                HelperDB.HelperDB.CreateCSVTable(ConnectionString);
             }
 
 

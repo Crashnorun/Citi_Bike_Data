@@ -94,8 +94,13 @@ namespace Citi_Bike_Data_02.HelperDB
                         columnString += name + " " + SQLColumns[name].ToLower() + ",";        // compile column names and data types
                     columnString = columnString.TrimEnd(',');
 
-                    using (SqlCommand command = new SqlCommand("If not exists (" + TableName + ")" +
-                        "begin create table " + TableName + "(" + columnString + "); end", conn))
+                    string com = "CREATE TABLE[dbo]." + TableName + "( " +
+                                " [Id] INT NOT NULL PRIMARY KEY, [ZIPFileName] TEXT NULL, " +
+                                "[CSVFileNames] TEXT NULL, [FullFolderPath] TEXT NULL )";
+
+                    //using (SqlCommand command = new SqlCommand("IF NOT EXISTS (" + TableName + ")" +
+                    //    "BEGIN CREATE TABLE " + TableName + "(" + columnString + "); END", conn))
+                    using (SqlCommand command = new SqlCommand(com, conn))
                     {
                         command.ExecuteNonQuery();
                         Debug.Print("Added " + TableName + " table to DB" + Environment.NewLine);
@@ -265,10 +270,10 @@ namespace Citi_Bike_Data_02.HelperDB
         }
 
 
-        public static void CreateCSVTable()
+        public static void CreateCSVTable(string ConnectionString)
         {
             // check if table exists
-            bool test = CheckIfTableExists(Properties.Resources.ConnectionStringBase, Properties.Resources.DBName,
+            bool test = CheckIfTableExists(ConnectionString, Properties.Resources.DBName,
                Properties.Resources.TableCSVFileName);
 
             if (!test)                                                                          // if table doesn't exist
@@ -279,7 +284,7 @@ namespace Citi_Bike_Data_02.HelperDB
                 Classes.cls_CSVFile csvFile = new Classes.cls_CSVFile();
                 ColumnNames = csvFile.GetType().GetProperties().ToDictionary(prop => prop.Name, prop => prop.PropertyType);                     // convert object properties to dictionary
 
-                CreateNewTable(Properties.Resources.TableCSVFileName, Properties.Resources.ConnectionStringBase, ColumnNames, ref message);     // create table
+                CreateNewTable(Properties.Resources.TableCSVFileName, ConnectionString, ColumnNames, ref message);     // create table
             }
         }
 
