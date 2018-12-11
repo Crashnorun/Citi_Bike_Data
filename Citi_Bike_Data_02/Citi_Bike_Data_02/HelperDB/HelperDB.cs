@@ -169,6 +169,7 @@ namespace Citi_Bike_Data_02.HelperDB
         /// <param name="DBName">DB Name</param>
         /// <param name="TableName">Table Name</param>
         /// <returns>FALSE if table does not exist, TRUE if tabel does exist</returns>
+        /// <reference>https://www.codeproject.com/Questions/1191245/Check-SQL-table-exist-or-not-in-Csharp</reference>
         public static bool CheckIfTableExists(string ConnectionString, string DBName, string TableName)
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
@@ -177,15 +178,7 @@ namespace Citi_Bike_Data_02.HelperDB
                     conn.Open();
                 try
                 {
-                    //string command = @"IF EXISTS(SELECT * " + DBName + ".TABLES " +             // create query string to check if table exists
-                    //   "WHERE TABLE_NAME='" + TableName + "') SELECT 1 ELSE SELECT 0";
-                    //string command = "SELECT * FROM " + DBName + ".TABLES " +
-                    //    "WHERE TABLE_NAME = '" + TableName + "'";
-                    string command = "SELECT * FROM " + DBName + 
-                        " WHERE TABLE_NAME = '" + TableName + "'";
-                    command = "SELECT CASE WHEN OBJECT_ID('" + DBName + "." + TableName + "' , 'U') IS NOT NULL THEN 1 ELSE 0 END";
-                    //string command = "SELECT CASE WHEN EXISTS ((SELECT * FROM " + DBName + " WHERE TABLE_NAME = '" + TableName + "')) THEN 1 ELSE 0 END";
-                    // conn.Open();
+                    string command = "SELECT CASE WHEN OBJECT_ID('" + DBName + "." + TableName + "' , 'U') IS NOT NULL THEN 1 ELSE 0 END";     // create query string to check if table exists
                     SqlCommand TableCheck = new SqlCommand(command, conn);                      // create query command to check if table exists
 
                     int x = Convert.ToInt32(TableCheck.ExecuteScalar());                        // execute query
@@ -267,7 +260,7 @@ namespace Citi_Bike_Data_02.HelperDB
                 Classes.cls_ZIPFile zipFile = new Classes.cls_ZIPFile();                        // create temporary object
                 ColumnNames = zipFile.GetType().GetProperties().ToDictionary(prop => prop.Name, prop => prop.PropertyType);                     // convert object properties to dictionary
 
-                CreateNewTable(Properties.Resources.TableZIPFileName, Properties.Resources.ConnectionStringBase, ColumnNames, ref message);     // create table
+                CreateNewTable(Properties.Resources.TableZIPFileName, ConnectionString, ColumnNames, ref message);     // create table
             }
         }
 
