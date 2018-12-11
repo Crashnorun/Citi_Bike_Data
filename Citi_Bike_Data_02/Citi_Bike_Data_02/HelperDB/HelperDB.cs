@@ -7,7 +7,9 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Reflection;
 using System.IO;
-
+using System.Data;
+using System.Collections;
+using System.Resources;
 
 namespace Citi_Bike_Data_02.HelperDB
 {
@@ -35,10 +37,13 @@ namespace Citi_Bike_Data_02.HelperDB
 
             string connectionString = string.Empty;
             string dbFilePath = Environment.CurrentDirectory + "\\" + DBName;                               // construct new DB file path
-            //string creationCmd = "CREATE DATABASE " + DBName + ";";                                       // SQL Create DB Command
+                                                                                                            //string creationCmd = "CREATE DATABASE " + DBName + ";";                                       // SQL Create DB Command
             string creationCmd = "CREATE DATABASE " + DBName + " ON PRIMARY " +                             // SQL Create DB Command
                 "(NAME = " + DBName + ", " +
                 "FILENAME = " + dbFilePath + ".mdf)";
+            //string creationCmd = "CREATE DATABASE " + DBName + " ON " +                             // SQL Create DB Command
+            //   "(NAME = " + DBName + ", " +
+            //   "FILENAME = '" + dbFilePath + ".mdf')";
 
             using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase))       // create connection
             {
@@ -54,6 +59,10 @@ namespace Citi_Bike_Data_02.HelperDB
                     Debug.Print("DB creation return value: " + num.ToString());
                     message = "DB creation return value: " + num.ToString();
                     connectionString = Properties.Resources.ConnectionStringBase + "AttachDbFilename=" + dbFilePath + ".mdf;";
+                    //AddValueToResources("DBConnectionString",
+                    //    @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = " + DBFilePath + "; Integrated security = True; database = master;");
+                    AddValueToResources("DBConnectionString",
+                  @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = " + DBFilePath + "; Integrated security = True;");
                     DBConnectionString = connectionString;                                                  // save DB connection string
                     DBFilePath = dbFilePath;                                                                // save DB file path
                 }
@@ -86,7 +95,7 @@ namespace Citi_Bike_Data_02.HelperDB
                     columnString = columnString.TrimEnd(',');
 
                     using (SqlCommand command = new SqlCommand("If not exists (" + TableName + ")" +
-                        "begin create table " + TableName + "(" + columnString + "); end",conn))
+                        "begin create table " + TableName + "(" + columnString + "); end", conn))
                     {
                         command.ExecuteNonQuery();
                         Debug.Print("Added " + TableName + " table to DB" + Environment.NewLine);
@@ -131,6 +140,10 @@ namespace Citi_Bike_Data_02.HelperDB
             if (File.Exists(dbPath))                                                            // check if DB exists in release mode
             {
                 DBFilePath = dbPath;                                                            // if db exists, save it's full path
+                                                                                                //AddValueToResources("DBConnectionString",
+                                                                                                //    @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = " + DBFilePath + "; Integrated security = True; database = master;");
+                AddValueToResources("DBConnectionString",
+                  @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = " + DBFilePath + "; Integrated security = True;");
                 return dbPath;                                                                  // return full path
             }
             else
@@ -164,9 +177,15 @@ namespace Citi_Bike_Data_02.HelperDB
                     conn.Open();
                 try
                 {
-                    string command = @"IF EXISTS(SELECT * " + DBName + ".TABLES " +             // create query string to check if table exists
-                       "WHERE TABLE_NAME='" + TableName + "') SELECT 1 ELSE SELECT 0";
-                    conn.Open();
+                    //string command = @"IF EXISTS(SELECT * " + DBName + ".TABLES " +             // create query string to check if table exists
+                    //   "WHERE TABLE_NAME='" + TableName + "') SELECT 1 ELSE SELECT 0";
+                    //string command = "SELECT * FROM " + DBName + ".TABLES " +
+                    //    "WHERE TABLE_NAME = '" + TableName + "'";
+                    string command = "SELECT * FROM " + DBName + 
+                        " WHERE TABLE_NAME = '" + TableName + "'";
+                    command = "SELECT CASE WHEN OBJECT_ID('" + DBName + "." + TableName + "' , 'U') IS NOT NULL THEN 1 ELSE 0 END";
+                    //string command = "SELECT CASE WHEN EXISTS ((SELECT * FROM " + DBName + " WHERE TABLE_NAME = '" + TableName + "')) THEN 1 ELSE 0 END";
+                    // conn.Open();
                     SqlCommand TableCheck = new SqlCommand(command, conn);                      // create query command to check if table exists
 
                     int x = Convert.ToInt32(TableCheck.ExecuteScalar());                        // execute query
@@ -234,10 +253,10 @@ namespace Citi_Bike_Data_02.HelperDB
         }
 
 
-        public static void CreateZIPTable()
+        public static void CreateZIPTable(string ConnectionString)
         {
             // check if table exists
-            bool test = CheckIfTableExists(Properties.Resources.ConnectionStringBase, Properties.Resources.DBName,
+            bool test = CheckIfTableExists(ConnectionString, Properties.Resources.DBName,
                Properties.Resources.TableZIPFileName);
 
             if (!test)                                                                          // if table doesn't exist
@@ -268,6 +287,41 @@ namespace Citi_Bike_Data_02.HelperDB
                 ColumnNames = csvFile.GetType().GetProperties().ToDictionary(prop => prop.Name, prop => prop.PropertyType);                     // convert object properties to dictionary
 
                 CreateNewTable(Properties.Resources.TableCSVFileName, Properties.Resources.ConnectionStringBase, ColumnNames, ref message);     // create table
+            }
+        }
+
+        public static int GetNumberOfTables(string ConnectionString)
+        {
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                try
+                {
+                    if (conn.State != System.Data.ConnectionState.Open)                         // check if it's open
+                        conn.Open();
+                    DataTable schema = conn.GetSchema("Tables");
+                    conn.Close();
+                    return schema.Rows.Count;
+                }
+                catch (Exception ex)
+                {
+                    conn.Close();
+                    Debug.Print("Could not get the number of tables in the DB" + Environment.NewLine + ex.Message);
+                }
+            }
+            return 0;
+        }
+
+
+        /// <summary>
+        /// Add a value to the resoureces file
+        /// </summary>
+        /// <param name="Key">Key | Value Name</param>
+        /// <param name="Value">Value</param>
+        public static void AddValueToResources(string Key, string Value)
+        {
+            using (ResXResourceWriter resxresourcewriter = new ResXResourceWriter(@".\CitiBikeResources.resx"))
+            {
+                resxresourcewriter.AddResource(Key, Value);
             }
         }
 

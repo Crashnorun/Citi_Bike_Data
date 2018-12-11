@@ -19,8 +19,10 @@ using System.Xml.Linq;
 using System.Xml;
 using System.Diagnostics;
 using System.Data;
+using System.Resources;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
+using System.Collections;
 
 namespace Citi_Bike_Data_02.UI
 {
@@ -53,6 +55,8 @@ namespace Citi_Bike_Data_02.UI
         /// <summary>
         /// Set progress bar color
         /// </summary>
+        /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.resources.resxresourcewriter?view=netframework-4.7.2</reference>
+        ///<reference>https://docs.microsoft.com/en-us/dotnet/framework/resources/working-with-resx-files-programmatically</reference> 
         public UserControl1()
         {
             InitializeComponent();
@@ -62,6 +66,39 @@ namespace Citi_Bike_Data_02.UI
             Color col = (Color)ColorConverter.ConvertFromString(Properties.Resources.CitiBikeColorHEX);         // get color from properties
             SolidColorBrush fill = new SolidColorBrush(col);                                                    // create a solid brush
             this.progressBar1.Foreground = fill;                                                                // apply brush to progress bar
+
+            // Create .resx file to hold the Connection string
+            using (ResXResourceWriter resxresourcewriter = new ResXResourceWriter(@".\CitiBikeResources.resx"))
+            {
+                resxresourcewriter.AddResource("DBConnectionString", "");
+            }
+
+            #region ----NOTES----
+            //Hashtable resourceEntries = new Hashtable();
+
+            //using (ResXResourceReader reader = new ResXResourceReader(@".\CitiBikeResources.resx"))
+            //{
+            //    foreach (DictionaryEntry d in reader)
+            //    {
+            //        if(d.Key.ToString() == "DBConnectionString")
+            //        {
+            //            if(d.Value.ToString() == "")
+            //                resourceEntries.Add(d.Key, "Bob");
+            //            else
+            //                resourceEntries.Add(d.Key, "");
+            //        }
+            //    }
+            //}
+
+            //using (ResXResourceWriter resxresourcewriter = new ResXResourceWriter(@".\CitiBikeResources.resx"))
+            //{
+            //    foreach (DictionaryEntry d in resourceEntries)
+            //    {
+            //        resxresourcewriter.AddResource(d.Key.ToString(), d.Value.ToString());
+            //    }
+            //}
+            #endregion
+
         }
 
 
@@ -86,9 +123,28 @@ namespace Citi_Bike_Data_02.UI
                     }
                 }
 
-
                 HelperDB.HelperDB.CreateNewDB(Properties.Resources.DBName, ref lblMessage);
                 lbl_Status_01.Content = lblMessage;
+            }
+            else           // find the location of the db
+            {
+                //https://stackoverflow.com/questions/8146207/how-to-get-current-connected-database-file-path
+                SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase);          // get the db File location
+                SqlCommand GetDataFile = new SqlCommand();
+                GetDataFile.Connection = conn;
+                GetDataFile.CommandText = "SELECT physical_name FROM sys.database_files WHERE type = 0";
+                try
+                {
+                    conn.Open();
+                    string DBFile = (string)GetDataFile.ExecuteScalar();
+                    conn.Close();
+                    Debug.Print("DB Location: " + DBFile);
+                    this.txtBlock.Text = "DB Location: " + DBFile;
+                }
+                catch (Exception ex)
+                {
+                    conn.Dispose();
+                }
             }
 
             #region ----NOTES----
@@ -130,10 +186,24 @@ namespace Citi_Bike_Data_02.UI
             //ButtonAutomationPeer peer = new ButtonAutomationPeer(btn_ConnectDB);
             //IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
             //invokeProv.Invoke();                    // click the "create db" button
+            string ConnectionString = "";
+            using (ResXResourceReader reader = new ResXResourceReader(@".\CitiBikeResources.resx"))
+            {
+                foreach (DictionaryEntry d in reader)
+                {
+                    if (d.Key.ToString() == "DBConnectionString")
+                        ConnectionString = d.Value.ToString(); break;
+                }
+            }
 
             // check if table exist
-            HelperDB.HelperDB.CreateZIPTable();
-            HelperDB.HelperDB.CreateCSVTable();
+            if (HelperDB.HelperDB.GetNumberOfTables(ConnectionString) == 0)
+            {
+                HelperDB.HelperDB.CreateZIPTable(ConnectionString);
+                HelperDB.HelperDB.CreateCSVTable();
+            }
+
+
         }
 
 
