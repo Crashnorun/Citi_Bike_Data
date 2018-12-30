@@ -74,7 +74,7 @@ namespace Citi_Bike_Data_02.HelperDB
             return connectionString;
         }
 
-               
+
         public static void CreateNewTable(string TableName, string ConnectionString, Dictionary<string, Type> ColumnNames, ref string message)
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
@@ -131,15 +131,15 @@ namespace Citi_Bike_Data_02.HelperDB
         /// <summary>
         /// Check if the DB exists at executing assembly
         /// Return false (as string) if DB does not exist
-        /// Return file path of DB if it does exist
+        /// Return the DB file path if found
         /// </summary>
         /// <reference>https://stackoverflow.com/questions/816566/how-do-you-get-the-current-project-directory-from-c-sharp-code-when-creating-a-c</reference>
         /// <returns>False = DB does not exist, or the file path were the db is located</returns>
         public static string CheckIfDBExists(string DBName)
         {
-            string path = GetExecutingAssemblyPath();                                           // get the executing assembly path
-            string dbPath = path + "\\" + DBName + ".mdf";                                      // create db file path string
-            //dbPath = Environment.CurrentDirectory + "\\" + DBName + ".mdf";                   // create db file path string
+            //string path = GetExecutingAssemblyPath();                                           // get the executing assembly path
+            //string dbPath = path + "\\" + DBName + ".mdf";                                      // create db file path string
+            string dbPath = Environment.CurrentDirectory + "\\" + DBName + ".mdf";                   // create db file path string
 
             if (File.Exists(dbPath))                                                            // check if DB file exists
             {
@@ -162,12 +162,10 @@ namespace Citi_Bike_Data_02.HelperDB
                             if (obj)
                             {
                                 // DB exists
-                                // need to get the location of the db. 
-                                // return dbPath;
-                            }
-                            else
-                            {
-                                // db does not exist
+                                DBFilePath = FindDBLocation();
+                                AddValueToResources("DBConnectionString",
+                                        @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = " + DBFilePath + "; Integrated security = True;");
+                                return dbPath;
                             }
                         }
                     }
@@ -181,6 +179,33 @@ namespace Citi_Bike_Data_02.HelperDB
                 DBFilePath = string.Empty;
                 return false.ToString().ToLower();
             }
+        }
+
+        /// <summary>
+        /// Find the file location of the DB
+        /// </summary>
+        /// <returns>Return the file path of the DB</returns>
+        public static string FindDBLocation()
+        {
+            //https://stackoverflow.com/questions/8146207/how-to-get-current-connected-database-file-path
+            SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase);          // create a base connection
+            SqlCommand GetDataFile = new SqlCommand();
+            GetDataFile.Connection = conn;
+            GetDataFile.CommandText = "SELECT physical_name FROM sys.database_files WHERE type = 0";
+            try
+            {
+                conn.Open();
+                string DBFile = (string)GetDataFile.ExecuteScalar();                                    // get db file location
+                conn.Close();
+                Debug.Print("DB Location: " + DBFile);
+                return DBFile;
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message);
+                conn.Dispose();
+            }
+            return null;
         }
 
 
