@@ -40,10 +40,7 @@ namespace Citi_Bike_Data_02.HelperDB
                                                                                                             //string creationCmd = "CREATE DATABASE " + DBName + ";";                                       // SQL Create DB Command
             string creationCmd = "CREATE DATABASE " + DBName + " ON PRIMARY " +                             // SQL Create DB Command
                 "(NAME = " + DBName + ", " +
-                "FILENAME = " + dbFilePath + ".mdf)";
-            //string creationCmd = "CREATE DATABASE " + DBName + " ON " +                             // SQL Create DB Command
-            //   "(NAME = " + DBName + ", " +
-            //   "FILENAME = '" + dbFilePath + ".mdf')";
+                "FILENAME = '" + dbFilePath + ".mdf')";
 
             using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase))       // create connection
             {
@@ -77,7 +74,7 @@ namespace Citi_Bike_Data_02.HelperDB
             return connectionString;
         }
 
-
+               
         public static void CreateNewTable(string TableName, string ConnectionString, Dictionary<string, Type> ColumnNames, ref string message)
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
@@ -134,36 +131,55 @@ namespace Citi_Bike_Data_02.HelperDB
         /// <summary>
         /// Check if the DB exists at executing assembly
         /// Return false (as string) if DB does not exist
+        /// Return file path of DB if it does exist
         /// </summary>
         /// <reference>https://stackoverflow.com/questions/816566/how-do-you-get-the-current-project-directory-from-c-sharp-code-when-creating-a-c</reference>
         /// <returns>False = DB does not exist, or the file path were the db is located</returns>
         public static string CheckIfDBExists(string DBName)
         {
             string path = GetExecutingAssemblyPath();                                           // get the executing assembly path
-            string dbPath = path + "\\" + DBName + ".mdf";                                      // create db RELEASE file path string
+            string dbPath = path + "\\" + DBName + ".mdf";                                      // create db file path string
+            //dbPath = Environment.CurrentDirectory + "\\" + DBName + ".mdf";                   // create db file path string
 
-            if (File.Exists(dbPath))                                                            // check if DB exists in release mode
+            if (File.Exists(dbPath))                                                            // check if DB file exists
             {
                 DBFilePath = dbPath;                                                            // if db exists, save it's full path
-                                                                                                //AddValueToResources("DBConnectionString",
-                                                                                                //    @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = " + DBFilePath + "; Integrated security = True; database = master;");
+                                                                                                //AddValueToResources("DBConnectionString", @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = " + DBFilePath + "; Integrated security = True; database = master;");
                 AddValueToResources("DBConnectionString",
                   @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = " + DBFilePath + "; Integrated security = True;");
                 return dbPath;                                                                  // return full path
             }
             else
             {
-                dbPath = Environment.CurrentDirectory + "\\" + DBName + ".mdf";                 // create db DEBUG file path string
-                if (File.Exists(dbPath))                                                        // in debug mode
+                try
                 {
-                    DBFilePath = dbPath;
-                    return dbPath;
+                    using (var connection = new SqlConnection(Properties.Resources.ConnectionStringBase))
+                    {
+                        using (var command = new SqlCommand($"SELECT db_id('{Properties.Resources.DBName}')", connection))
+                        {
+                            connection.Open();
+                            bool obj = (command.ExecuteScalar() != DBNull.Value);
+                            if (obj)
+                            {
+                                // DB exists
+                                // need to get the location of the db. 
+                                // return dbPath;
+                            }
+                            else
+                            {
+                                // db does not exist
+                            }
+                        }
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
+                    Debug.Print(ex.Message);
                     DBFilePath = string.Empty;
                     return false.ToString().ToLower();
                 }
+                DBFilePath = string.Empty;
+                return false.ToString().ToLower();
             }
         }
 

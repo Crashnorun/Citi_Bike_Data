@@ -53,7 +53,7 @@ namespace Citi_Bike_Data_02.UI
         #region ----UI----
 
         /// <summary>
-        /// Set progress bar color
+        /// Set progress bar color, create resources file to hold DB connection string
         /// </summary>
         /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.resources.resxresourcewriter?view=netframework-4.7.2</reference>
         ///<reference>https://docs.microsoft.com/en-us/dotnet/framework/resources/working-with-resx-files-programmatically</reference> 
@@ -68,10 +68,13 @@ namespace Citi_Bike_Data_02.UI
             this.progressBar1.Foreground = fill;                                                                // apply brush to progress bar
 
             // Create .resx file to hold the Connection string
-            using (ResXResourceWriter resxresourcewriter = new ResXResourceWriter(@".\CitiBikeResources.resx"))
+            if(!System.IO.File.Exists(HelperDB.HelperDB.GetExecutingAssemblyPath() + "\\CitiBikeResources.resx"))
             {
-                resxresourcewriter.AddResource("DBConnectionString", "");
-            }
+                using (ResXResourceWriter resxresourcewriter = new ResXResourceWriter(@".\CitiBikeResources.resx"))
+                {
+                    resxresourcewriter.AddResource("DBConnectionString", "");
+                }
+            }            
 
             #region ----NOTES----
             //Hashtable resourceEntries = new Hashtable();
@@ -113,17 +116,17 @@ namespace Citi_Bike_Data_02.UI
             if (DBFilePath == false.ToString().ToLower())
             {
                 // check connection
-                using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase))       // create connection
-                {
-                    if (conn.State == System.Data.ConnectionState.Open)                                         // check if it's open
-                    {
-                        Debug.Print("DB Name: " + conn.Database);
-                        Debug.Print("DB Data Source: " + conn.DataSource);
-                        conn.Close();
-                    }
-                }
+                //using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase))       // create connection
+                //{
+                //    if (conn.State == System.Data.ConnectionState.Open)                                         // check if it's open
+                //    {
+                //        Debug.Print("DB Name: " + conn.Database);
+                //        Debug.Print("DB Data Source: " + conn.DataSource);
+                //        conn.Close();
+                //    }
+                //}
 
-                HelperDB.HelperDB.CreateNewDB(Properties.Resources.DBName, ref lblMessage);
+                HelperDB.HelperDB.CreateNewDB(Properties.Resources.DBName, ref lblMessage);                     // create new DB
                 lbl_Status_01.Content = lblMessage;
             }
             else           // find the location of the db
@@ -136,7 +139,7 @@ namespace Citi_Bike_Data_02.UI
                 try
                 {
                     conn.Open();
-                    string DBFile = (string)GetDataFile.ExecuteScalar();
+                    string DBFile = (string)GetDataFile.ExecuteScalar();                                    // get db file location
                     conn.Close();
                     Debug.Print("DB Location: " + DBFile);
                     this.txtBlock.Text = "DB Location: " + DBFile;
@@ -199,11 +202,9 @@ namespace Citi_Bike_Data_02.UI
             // check if table exist
             if (HelperDB.HelperDB.GetNumberOfTables(ConnectionString) == 0)
             {
-                HelperDB.HelperDB.CreateZIPTable(ConnectionString);
-                HelperDB.HelperDB.CreateCSVTable(ConnectionString);
+                HelperDB.HelperDB.CreateZIPTable(ConnectionString);                     // create ZIP File table
+                HelperDB.HelperDB.CreateCSVTable(ConnectionString);                     // create CSV File table
             }
-
-
         }
 
 
