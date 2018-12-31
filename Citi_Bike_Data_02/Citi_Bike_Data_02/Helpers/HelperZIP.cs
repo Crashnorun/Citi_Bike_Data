@@ -133,10 +133,5 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
-        // open new directory
-        // read csv files
-        // read documents in zip file
-        // save documents in zip file
-        // 
     }
 }
