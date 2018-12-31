@@ -233,21 +233,22 @@ namespace Citi_Bike_Data_02.UI
             if (XMLDocument == null)
                 DownloadXMLFile();
 
-            ExtractZipFileList(XMLDocument);                                                // get the xml document with zip file names
-            foreach (string name in ZIPFileNamesOnline)
+            ExtractZipFileList(XMLDocument);                                                    // get the xml document with zip file names
+
+            foreach (string ZIPName in ZIPFileNamesOnline)
             {
-                if (!Helper.HelperZIP.DownloadZIPFile(name))                                // download zip files
+                if (!Helper.HelperZIP.DownloadZIPFile(ZIPName))                                 // download zip files
                     break;
 
-                if (!Helper.HelperZIP.UnZIPFile(name, out path))                            // unzip files
+                if (!Helper.HelperZIP.UnZIPFile(ZIPName, out files))                            // unzip files
                     break;
 
-                int numFiles = Helper.HelperZIP.NumberOfUnzipedFiles(Environment.CurrentDirectory + "\\" + name, out files);
+                //int numFiles = Helper.HelperZIP.NumberOfUnzipedFiles(Environment.CurrentDirectory + "\\" + ZIPName, out files);
 
-                for (int i = 0; i < numFiles; i++)
+                for (int i = 0; i < files.Count; i++)
                 {
-                    CSVData = Helper.HelperZIP.ReadCSVFiles(Environment.CurrentDirectory + "\\" + name);
-                    Helper.HelperZIP.DeleteCSVFile(Environment.CurrentDirectory, name); // delete file
+                    CSVData = Helper.HelperZIP.ReadCSVFiles(Environment.CurrentDirectory + "\\" + ZIPName);
+                    Helper.HelperZIP.DeleteCSVFile(Environment.CurrentDirectory, ZIPName); // delete file
                 }
 
             }

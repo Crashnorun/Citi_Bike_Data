@@ -47,20 +47,33 @@ namespace Citi_Bike_Data_02.Helper
         /// <reference>https://social.msdn.microsoft.com/Forums/en-US/c3be2f07-821e-482c-b9e5-0c8add5506e0/reading-contents-of-a-zip-file-within-a-zipfile-without-extracting?forum=csharpgeneral</refernce>
         /// <param name="FileName">File name to save</param>
         /// <param name="FilePath">File path where document(s) saved</param>
-        public static bool UnZIPFile(string FileName, out string FilePath)
+        public static bool UnZIPFile(string FileName, out List<string> FilePaths)
         {
             string path = Environment.CurrentDirectory + "\\" + FileName;
+            List<string> fileNames = new List<string>();
 
-            using (ZipArchive archive = ZipFile.OpenRead(path))
+            using (ZipArchive archive = ZipFile.OpenRead(path))                                 // open zip file
             {
-                foreach(ZipArchiveEntry entry in archive.Entries)
+                foreach (ZipArchiveEntry entry in archive.Entries)      
                 {
-                    if (entry.FullName.EndsWith(".csv", StringComparison.CurrentCultureIgnoreCase))
+                    if (entry.FullName.EndsWith(".csv", StringComparison.CurrentCultureIgnoreCase))     // if entries contain .csv
                     {
-                        FilePath = Path.Combine(Environment.CurrentDirectory, entry.FullName);
-                        entry.ExtractToFile(FilePath);
+                        try
+                        {
+                            string filePath = Path.Combine(Environment.CurrentDirectory, entry.FullName);
+                            fileNames.Add(entry.FullName);                                      // save file name
+                            entry.ExtractToFile(filePath);                                      // extract csv
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+                            FilePaths = null;
+                            return false;
+                        }
                     }
                 }
+                FilePaths = fileNames;
+                return true;
             }
 
             /*try
@@ -121,7 +134,8 @@ namespace Citi_Bike_Data_02.Helper
             try
             {
                 File.Delete(DirectoryPath + "\\" + fileName);
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
             }
