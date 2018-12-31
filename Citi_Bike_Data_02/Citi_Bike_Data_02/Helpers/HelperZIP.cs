@@ -10,6 +10,21 @@ using System.IO;
 
 namespace Citi_Bike_Data_02.Helper
 {
+    /*
+     * Download ZIP file from url
+     * Unzip File - return list of csv file names in the zip file
+     * Read CSV
+     * Delete file
+     */
+
+    /* 
+     * Create function that creates a Datatable
+     *      Match columns in datatable with columns in CSV file
+     *      Need a datatable schema -> convert headers accordingly
+     *      Convert csv data into data table
+     * Populate data into DB
+     */
+
     public static class HelperZIP
     {
         /// <summary>
@@ -113,15 +128,19 @@ namespace Citi_Bike_Data_02.Helper
         /// <reference>https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/file-system/how-to-read-from-a-text-file</reference>
         /// <param name="FilePath"></param>
         /// <returns>List of strings </returns>
-        public static List<string> ReadCSVFiles(string FilePath)
+        public static List<string> ReadCSVFile(string FilePath)
         {
             List<string> csvData = new List<string>();
             csvData = File.ReadAllLines(FilePath).ToList();
             return csvData;
         }
 
-
-        public static void DeleteCSVFile(string DirectoryPath, string fileName)
+        /// <summary>
+        /// Delete file from a directory
+        /// </summary>
+        /// <param name="DirectoryPath"></param>
+        /// <param name="fileName"></param>
+        public static void DeleteFile(string DirectoryPath, string fileName)
         {
             try
             {

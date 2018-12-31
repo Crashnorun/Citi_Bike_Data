@@ -13,6 +13,20 @@ using System.Resources;
 
 namespace Citi_Bike_Data_02.Helper
 {
+    /*
+     * Create new DB
+     * Create new Table
+     * Get Executing Assembly Path
+     * Check If DB exists
+     * Find DB Location
+     * Check if table exists
+     * Convert to SQL Types
+     * Create ZIP Table
+     * Create CSV Table
+     * Get Number of Tables
+     * Add value to resources file
+     */
+
     static class HelperDB
     {
         static string DBFilePath;
