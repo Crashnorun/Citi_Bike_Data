@@ -65,7 +65,7 @@ namespace Citi_Bike_Data_02.UI
             this.progressBar1.Foreground = fill;                                                                // apply brush to progress bar
 
             // Create .resx file to hold the Connection string
-            if (!System.IO.File.Exists(HelperDB.HelperDB.GetExecutingAssemblyPath() + "\\CitiBikeResources.resx"))
+            if (!System.IO.File.Exists(Helper.HelperDB.GetExecutingAssemblyPath() + "\\CitiBikeResources.resx"))
             {
                 using (ResXResourceWriter resxresourcewriter = new ResXResourceWriter(@".\CitiBikeResources.resx"))
                 {
@@ -109,10 +109,10 @@ namespace Citi_Bike_Data_02.UI
         /// <param name="e"></param>
         private void btn_CreateDB_Click(object sender, RoutedEventArgs e)
         {
-            string DBFilePath = HelperDB.HelperDB.CheckIfDBExists(Properties.Resources.DBName);
+            string DBFilePath = Helper.HelperDB.CheckIfDBExists(Properties.Resources.DBName);
             if (DBFilePath == false.ToString().ToLower())
             {
-                HelperDB.HelperDB.CreateNewDB(Properties.Resources.DBName, ref lblMessage);                     // create new DB
+                Helper.HelperDB.CreateNewDB(Properties.Resources.DBName, ref lblMessage);                     // create new DB
                 lbl_Status_01.Content = lblMessage;
             }
             else           // find the location of the db
@@ -186,10 +186,10 @@ namespace Citi_Bike_Data_02.UI
             }
 
             // check if table exist
-            if (HelperDB.HelperDB.GetNumberOfTables(ConnectionString) == 0)
+            if (Helper.HelperDB.GetNumberOfTables(ConnectionString) == 0)
             {
-                HelperDB.HelperDB.CreateZIPTable(ConnectionString);                     // create ZIP File table
-                HelperDB.HelperDB.CreateCSVTable(ConnectionString);                     // create CSV File table
+                Helper.HelperDB.CreateZIPTable(ConnectionString);                     // create ZIP File table
+                Helper.HelperDB.CreateCSVTable(ConnectionString);                     // create CSV File table
             }
         }
 
@@ -226,12 +226,31 @@ namespace Citi_Bike_Data_02.UI
 
         private void btn_DLZIPFiles_Click(object sender, RoutedEventArgs e)
         {
+            string path; // = Environment.CurrentDirectory + "\\" + name;
+            List<string> files = new List<string>();
+            List<string> CSVData = new List<string>();
+
             if (XMLDocument == null)
                 DownloadXMLFile();
 
             ExtractZipFileList(XMLDocument);                                                // get the xml document with zip file names
-                                                                                            // download zip files
-                                                                                            // unzip files
+            foreach (string name in ZIPFileNamesOnline)
+            {
+                if (!Helper.HelperZIP.DownloadZIPFile(name))                                // download zip files
+                    break;
+
+                if (!Helper.HelperZIP.UnZIPFile(name, out path))                            // unzip files
+                    break;
+
+                int numFiles = Helper.HelperZIP.NumberOfUnzipedFiles(Environment.CurrentDirectory + "\\" + name, out files);
+
+                for (int i = 0; i < numFiles; i++)
+                {
+                    CSVData = Helper.HelperZIP.ReadCSVFiles(Environment.CurrentDirectory + "\\" + name);
+                    Helper.HelperZIP.DeleteCSVFile(Environment.CurrentDirectory, name); // delete file
+                }
+
+            }
 
             List<string> newZIPFileNames = new List<string>();
             GetZIPFileNamesFromDB();                                                        // get zip file names from db

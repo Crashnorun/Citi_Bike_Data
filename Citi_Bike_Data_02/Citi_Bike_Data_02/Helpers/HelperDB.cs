@@ -11,7 +11,7 @@ using System.Data;
 using System.Collections;
 using System.Resources;
 
-namespace Citi_Bike_Data_02.HelperDB
+namespace Citi_Bike_Data_02.Helper
 {
     static class HelperDB
     {

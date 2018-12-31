@@ -54,7 +54,7 @@ namespace Citi_Bike_Data_02.Classes
             List<string> FileNames = new List<string>();                                        // store file names
 
             if (destinationFolder == "")                                                        // if no destination folder is specified
-                destinationFolder = HelperDB.HelperDB.GetExecutingAssemblyPath();               // get executing assembly folder
+                destinationFolder = Helper.HelperDB.GetExecutingAssemblyPath();               // get executing assembly folder
             else if (!Directory.Exists(destinationFolder))                                      // if folder does not exist
                 Directory.CreateDirectory(destinationFolder);                                   // create folder
 
