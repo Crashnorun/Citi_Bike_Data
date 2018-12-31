@@ -243,21 +243,15 @@ namespace Citi_Bike_Data_02.UI
                 if (!Helper.HelperZIP.UnZIPFile(ZIPName, out files))                            // unzip files
                     break;
 
-                //int numFiles = Helper.HelperZIP.NumberOfUnzipedFiles(Environment.CurrentDirectory + "\\" + ZIPName, out files);
-
                 for (int i = 0; i < files.Count; i++)
                 {
-                    CSVData = Helper.HelperZIP.ReadCSVFiles(Environment.CurrentDirectory + "\\" + ZIPName);
-                    Helper.HelperZIP.DeleteCSVFile(Environment.CurrentDirectory, ZIPName); // delete file
+                    CSVData = Helper.HelperZIP.ReadCSVFiles(Environment.CurrentDirectory + "\\" + files[i]);
+                    Helper.HelperZIP.DeleteCSVFile(Environment.CurrentDirectory, files[i]); // delete CSV file
+
+                    // populate db
                 }
-
+                Helper.HelperZIP.DeleteCSVFile(Environment.CurrentDirectory, ZIPName); // delete ZIP file
             }
-
-            List<string> newZIPFileNames = new List<string>();
-            GetZIPFileNamesFromDB();                                                        // get zip file names from db
-            newZIPFileNames = CompareZIPFileNames(ZIPFileNamesOnline, ZIPFileNamesDB);       // compare current file names with stored file names
-            if (newZIPFileNames.Count > 0)                                                    // if there are new file names
-                AddZIPFileNamesToDB(newZIPFileNames);                                       // save new file names
 
         }
 

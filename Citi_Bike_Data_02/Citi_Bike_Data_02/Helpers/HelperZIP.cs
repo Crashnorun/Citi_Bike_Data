@@ -57,14 +57,14 @@ namespace Citi_Bike_Data_02.Helper
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
                     // if entries contain .csv and is not a macos file
-                    if (entry.FullName.EndsWith(".csv", StringComparison.CurrentCultureIgnoreCase) && !entry.FullName.Contains("MACOS"))     
+                    if (entry.FullName.EndsWith(".csv", StringComparison.CurrentCultureIgnoreCase) && !entry.FullName.Contains("MACOS"))
                     {
                         try
                         {
                             string filePath = Path.Combine(Environment.CurrentDirectory, entry.FullName);
 
                             // the zip files contain a csv file and a macOS csv file, we only need one of them.
-                            if (!fileNames.Contains(entry.FullName) && !File.Exists(filePath) )
+                            if (!fileNames.Contains(entry.FullName) && !File.Exists(filePath))
                             {
                                 fileNames.Add(entry.FullName);                                      // save file name
                                 entry.ExtractToFile(filePath);                                      // extract csv
@@ -107,17 +107,16 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
+        /// <summary>
+        /// Read teh CSV file line by line
+        /// </summary>
+        /// <reference>https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/file-system/how-to-read-from-a-text-file</reference>
+        /// <param name="FilePath"></param>
+        /// <returns>List of strings </returns>
         public static List<string> ReadCSVFiles(string FilePath)
         {
             List<string> csvData = new List<string>();
-
-            using (StreamReader reader = new StreamReader(FilePath))
-            {
-                while (!reader.EndOfStream)
-                {
-                    csvData.Add(reader.ReadLine());
-                }
-            }
+            csvData = File.ReadAllLines(FilePath).ToList();
             return csvData;
         }
 
