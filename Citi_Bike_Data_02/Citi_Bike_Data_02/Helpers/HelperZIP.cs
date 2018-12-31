@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.IO.Compression;
 
 namespace Citi_Bike_Data_02.Helpers
 {
@@ -36,11 +37,30 @@ namespace Citi_Bike_Data_02.Helpers
             }
         }
 
-        static void UnZIPFile(string FileName)
+        /// <summary>
+        /// Unzip file to Environment.CurrentDirectory
+        /// </summary>
+        /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.io.compression.zipfile.extracttodirectory?view=netframework-4.7.2</reference>
+        /// <param name="FileName">File name to save</param>
+        /// <param name="FilePath">File path where document(s) saved</param>
+        static bool UnZIPFile(string FileName, out string FilePath)
         {
-
+            string path = Environment.CurrentDirectory + "\\" + FileName;
+            try {
+                ZipFile.ExtractToDirectory(path, Environment.CurrentDirectory);
+                FilePath = Environment.CurrentDirectory + "\\" + FileName;
+                return true;
+            } catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
+                FilePath = string.Empty;
+                return false;
+            }
         }
-        // unzip file
+
+        // open new directory
+        // count number of files
+        // get file names
         // read documents in zip file
         // save documents in zip file
         // 
