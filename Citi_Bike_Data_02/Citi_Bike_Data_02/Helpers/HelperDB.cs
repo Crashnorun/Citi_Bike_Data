@@ -383,6 +383,11 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
+        /// <summary>
+        /// Get a DB Table Schema
+        /// </summary>
+        /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqldatareader?view=netframework-4.7.2</reference>
+        /// <param name="TableName"></param>
         public static void GetTableSchema(string TableName)
         {
             Dictionary<string, Type> TableSchema = new Dictionary<string, Type>();
@@ -390,16 +395,15 @@ namespace Citi_Bike_Data_02.Helper
             SqlConnection conn = new SqlConnection(connectionString);
             string commandText = "SELECT * FROM " + TableName;
             SqlCommand command = new SqlCommand(commandText, conn);
+
             try
             {
                 conn.Open();
-                DataTable dt = new DataTable();
-                SqlDataAdapter adapter = new SqlDataAdapter(command);
-                adapter.Fill(dt);
+                SqlDataReader reader = command.ExecuteReader();
 
-                foreach (DataColumn col in dt.Columns)
+                for (int i = 0; i < reader.VisibleFieldCount; i++)
                 {
-                    TableSchema.Add(col.ColumnName, col.DataType);
+                    TableSchema.Add(reader.GetName(i), reader.GetFieldType(i));
                 }
             }
             catch (Exception ex)
@@ -410,8 +414,42 @@ namespace Citi_Bike_Data_02.Helper
             {
                 if (conn.State == ConnectionState.Open)
                     conn.Close();
-
             }
         }
+
+        /// <summary>
+        /// Copy a SQL table into a DataTable
+        /// </summary>
+        /// <reference>https://stackoverflow.com/questions/6073382/read-sql-table-into-c-sharp-datatable</reference>
+        /// <param name="TableName"></param>
+        /// <returns></returns>
+        public static DataTable GetDBTable(string TableName)
+        {
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            SqlConnection conn = new SqlConnection(connectionString);
+            string commandText = "SELECT * FROM " + TableName;
+            SqlCommand command = new SqlCommand(commandText, conn);
+            DataTable dt = new DataTable();
+
+            try
+            {
+                conn.Open();
+
+                SqlDataAdapter adapter = new SqlDataAdapter(command);
+                adapter.Fill(dt);
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+                return null;
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open)
+                    conn.Close();
+            }
+            return dt;
+        }
+
     }           // close class
 }               // close namespace
