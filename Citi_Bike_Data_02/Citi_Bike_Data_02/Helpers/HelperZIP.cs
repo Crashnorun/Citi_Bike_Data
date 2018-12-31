@@ -54,15 +54,21 @@ namespace Citi_Bike_Data_02.Helper
 
             using (ZipArchive archive = ZipFile.OpenRead(path))                                 // open zip file
             {
-                foreach (ZipArchiveEntry entry in archive.Entries)      
+                foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    if (entry.FullName.EndsWith(".csv", StringComparison.CurrentCultureIgnoreCase))     // if entries contain .csv
+                    // if entries contain .csv and is not a macos file
+                    if (entry.FullName.EndsWith(".csv", StringComparison.CurrentCultureIgnoreCase) && !entry.FullName.Contains("MACOS"))     
                     {
                         try
                         {
                             string filePath = Path.Combine(Environment.CurrentDirectory, entry.FullName);
-                            fileNames.Add(entry.FullName);                                      // save file name
-                            entry.ExtractToFile(filePath);                                      // extract csv
+
+                            // the zip files contain a csv file and a macOS csv file, we only need one of them.
+                            if (!fileNames.Contains(entry.FullName) && !File.Exists(filePath) )
+                            {
+                                fileNames.Add(entry.FullName);                                      // save file name
+                                entry.ExtractToFile(filePath);                                      // extract csv
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -75,19 +81,6 @@ namespace Citi_Bike_Data_02.Helper
                 FilePaths = fileNames;
                 return true;
             }
-
-            /*try
-            {
-                ZipFile.ExtractToDirectory(path, Environment.CurrentDirectory);
-                FilePath = Environment.CurrentDirectory + "\\" + FileName;
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Debug.Print(ex.Message);
-                FilePath = string.Empty;
-                return false;
-            } */
         }
 
 
