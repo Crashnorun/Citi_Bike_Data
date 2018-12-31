@@ -79,11 +79,47 @@ namespace Citi_Bike_Data_02.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Data Source=(LocalDB)\MSSQLLocalDB; database=master; Integrated security=True;.
+        /// </summary>
+        internal static string ConnectionStringBase {
+            get {
+                return ResourceManager.GetString("ConnectionStringBase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\cportelli\Documents\Personal\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True;Connect Timeout=30.
         /// </summary>
-        internal static string ConnectionString {
+        internal static string ConnectionStringDebug {
             get {
-                return ResourceManager.GetString("ConnectionString", resourceCulture);
+                return ResourceManager.GetString("ConnectionStringDebug", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string ConnectionStringRelease {
+            get {
+                return ResourceManager.GetString("ConnectionStringRelease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CitiBikeData.
+        /// </summary>
+        internal static string DBName {
+            get {
+                return ResourceManager.GetString("DBName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CSVFileNames.
+        /// </summary>
+        internal static string TableCSVFileName {
+            get {
+                return ResourceManager.GetString("TableCSVFileName", resourceCulture);
             }
         }
         

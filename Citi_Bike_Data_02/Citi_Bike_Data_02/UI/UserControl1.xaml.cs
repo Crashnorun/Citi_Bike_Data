@@ -19,30 +19,29 @@ using System.Xml.Linq;
 using System.Xml;
 using System.Diagnostics;
 using System.Data;
+using System.Resources;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
+using System.Collections;
 
 namespace Citi_Bike_Data_02.UI
 {
-    /// <summary>
-    /// Interaction logic for UserControl1.xaml
-    /// </summary>
+
     public partial class UserControl1 : UserControl
     {
 
         #region ----PROPERTIES----
 
         public XDocument XMLDocument;
-
-        public List<string> ZIPFileNamesOnline;
-
+        public List<string> ZIPFileNamesOnline = new List<string>();
         public Dictionary<int, string> ZIPFileNamesDB;
-
 
         #endregion
 
 
         #region ----FIELDS----
 
-
+        private string lblMessage = string.Empty;
 
 
         #endregion
@@ -50,14 +49,56 @@ namespace Citi_Bike_Data_02.UI
 
         #region ----UI----
 
+        /// <summary>
+        /// Set progress bar color, create resources file to hold DB connection string
+        /// </summary>
+        /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.resources.resxresourcewriter?view=netframework-4.7.2</reference>
+        ///<reference>https://docs.microsoft.com/en-us/dotnet/framework/resources/working-with-resx-files-programmatically</reference> 
         public UserControl1()
         {
             InitializeComponent();
 
             lbl_Status_01.Content = string.Empty;
+            lbl_Status_01.ToolTip = lbl_Status_01.Content;
             Color col = (Color)ColorConverter.ConvertFromString(Properties.Resources.CitiBikeColorHEX);         // get color from properties
             SolidColorBrush fill = new SolidColorBrush(col);                                                    // create a solid brush
             this.progressBar1.Foreground = fill;                                                                // apply brush to progress bar
+
+            // Create .resx file to hold the Connection string
+            if (!System.IO.File.Exists(Helper.HelperDB.GetExecutingAssemblyPath() + "\\CitiBikeResources.resx"))
+            {
+                using (ResXResourceWriter resxresourcewriter = new ResXResourceWriter(@".\CitiBikeResources.resx"))
+                {
+                    resxresourcewriter.AddResource("DBConnectionString", "");
+                }
+            }
+
+            #region ----NOTES----
+            //Hashtable resourceEntries = new Hashtable();
+
+            //using (ResXResourceReader reader = new ResXResourceReader(@".\CitiBikeResources.resx"))
+            //{
+            //    foreach (DictionaryEntry d in reader)
+            //    {
+            //        if(d.Key.ToString() == "DBConnectionString")
+            //        {
+            //            if(d.Value.ToString() == "")
+            //                resourceEntries.Add(d.Key, "Bob");
+            //            else
+            //                resourceEntries.Add(d.Key, "");
+            //        }
+            //    }
+            //}
+
+            //using (ResXResourceWriter resxresourcewriter = new ResXResourceWriter(@".\CitiBikeResources.resx"))
+            //{
+            //    foreach (DictionaryEntry d in resourceEntries)
+            //    {
+            //        resxresourcewriter.AddResource(d.Key.ToString(), d.Value.ToString());
+            //    }
+            //}
+            #endregion
+
         }
 
 
@@ -68,25 +109,87 @@ namespace Citi_Bike_Data_02.UI
         /// <param name="e"></param>
         private void btn_CreateDB_Click(object sender, RoutedEventArgs e)
         {
-            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
+            string DBFilePath = Helper.HelperDB.CheckIfDBExists(Properties.Resources.DBName);
+            if (DBFilePath == false.ToString().ToLower())
             {
-                try
+                Helper.HelperDB.CreateNewDB(Properties.Resources.DBName, ref lblMessage);                     // create new DB
+                lbl_Status_01.Content = lblMessage;
+            }
+            else           // find the location of the db
+            {
+                ////https://stackoverflow.com/questions/8146207/how-to-get-current-connected-database-file-path
+                //SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase);          // get the db File location
+                //SqlCommand GetDataFile = new SqlCommand();
+                //GetDataFile.Connection = conn;
+                //GetDataFile.CommandText = "SELECT physical_name FROM sys.database_files WHERE type = 0";
+                //try
+                //{
+                //    conn.Open();
+                //    string DBFile = (string)GetDataFile.ExecuteScalar();                                    // get db file location
+                //    conn.Close();
+                //    Debug.Print("DB Location: " + DBFile);
+                //    this.txtBlock.Text = "DB Location: " + DBFile;
+                //}
+                //catch (Exception ex)
+                //{
+                //    conn.Dispose();
+                //}
+            }
+
+            #region ----NOTES----
+            //            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))
+            //            {
+            //                try
+            //                {
+            //                    conn.Open();                                                                // open connection to db
+            //                    lbl_Status_01.Content = "Established connection to DB";
+            //#if DEBUG
+            //                    Debug.Print("Established DB Connection");
+            //#endif
+            //                }
+            //                catch (SqlException ex)
+            //                {
+            //                    lbl_Status_01.Content = "Unable to establish connection to DB" + ex.Message;
+            //                    txtBlock.Text = ex.Message;
+            //                    txtBlock.TextWrapping = TextWrapping.Wrap;
+            //#if DEBUG
+            //                    Debug.Print("CANNOT Established DB Connection");
+            //#endif
+            //                }
+            //                if (conn != null && conn.State == System.Data.ConnectionState.Open)
+            //                    conn.Close();                                                               // close connection
+            //            }
+            #endregion
+        }
+
+
+        //private IInvokeProvider Invoke(object sender, RoutedEventArgs e)
+        //{
+        //    var i = 100;
+        //    return null;
+        //}
+
+
+        private void btn_CreateTable_Click(object sender, RoutedEventArgs e)
+        {
+            //ButtonAutomationPeer peer = new ButtonAutomationPeer(btn_ConnectDB);
+            //IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+            //invokeProv.Invoke();                    // click the "create db" button
+            string ConnectionString = "";
+            using (ResXResourceReader reader = new ResXResourceReader(@".\CitiBikeResources.resx"))
+            {
+                foreach (DictionaryEntry d in reader)
                 {
-                    conn.Open();                                                                // open connection to db
-                    lbl_Status_01.Content = "Established connection to DB";
-#if DEBUG
-                    Debug.Print("Established DB Connection");
-#endif
+                    if (d.Key.ToString() == "DBConnectionString")
+                        ConnectionString = d.Value.ToString(); break;
                 }
-                catch (SqlException ex)
-                {
-                    lbl_Status_01.Content = "Unable to establish connection to DB" + ex.Message;
-#if DEBUG
-                    Debug.Print("CANNOT Established DB Connection");
-#endif
-                }
-                if (conn != null && conn.State == System.Data.ConnectionState.Open)
-                    conn.Close();                                                               // close connection
+            }
+
+            // check if table exist
+            if (Helper.HelperDB.GetNumberOfTables(ConnectionString) == 0)
+            {
+                Helper.HelperDB.CreateZIPTable(ConnectionString);                     // create ZIP File table
+                Helper.HelperDB.CreateCSVTable(ConnectionString);                     // create CSV File table
             }
         }
 
@@ -119,6 +222,37 @@ namespace Citi_Bike_Data_02.UI
                 AddZIPFileNamesToDB(tempZIPFileNames);              // add new
             else
                 lbl_Status_01.Content = "No new ZIP File Names to add";
+        }
+
+        private void btn_DLZIPFiles_Click(object sender, RoutedEventArgs e)
+        {
+            string path; // = Environment.CurrentDirectory + "\\" + name;
+            List<string> files = new List<string>();
+            List<string> CSVData = new List<string>();
+
+            if (XMLDocument == null)
+                DownloadXMLFile();
+
+            ExtractZipFileList(XMLDocument);                                                    // get the xml document with zip file names
+
+            foreach (string ZIPName in ZIPFileNamesOnline)
+            {
+                if (!Helper.HelperZIP.DownloadZIPFile(ZIPName))                                 // download zip files
+                    break;
+
+                if (!Helper.HelperZIP.UnZIPFile(ZIPName, out files))                            // unzip files
+                    break;
+
+                for (int i = 0; i < files.Count; i++)
+                {
+                    CSVData = Helper.HelperZIP.ReadCSVFile(Environment.CurrentDirectory + "\\" + files[i]);
+                    Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, files[i]); // delete CSV file
+
+                    // populate db
+                }
+                Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, ZIPName); // delete ZIP file
+            }
+
         }
 
 
@@ -172,9 +306,6 @@ namespace Citi_Bike_Data_02.UI
                 lbl_Status_01.Content = "Downloaded XML Data";
             }
 
-            //if (XMLDocument != null)
-            //    ExtractZipFileList();
-
             this.progressBar1.Value = 0;                                                        // reset progress bar (I think)
         }
 
@@ -200,6 +331,7 @@ namespace Citi_Bike_Data_02.UI
 
             List<string> zipFileNamesOnline = new List<string>();
             zipFileNamesOnline = tempFileNames.ToList();                                        // save values to list
+            ZIPFileNamesOnline = zipFileNamesOnline;
 
 #if DEBUG
             Debug.Print("Number of ZIP files in XML File: " + zipFileNamesOnline.Count);
@@ -216,7 +348,9 @@ namespace Citi_Bike_Data_02.UI
         /// <returns>List of ZIP File names in the DB. If list.count = 0, there are no file names in the DB</returns>
         private Dictionary<int, string> GetZIPFileNamesFromDB()
         {
-            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))   // create a connection
+            string connectionString = @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf; Integrated Security = True";
+            //using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))   // create a connection
+            using (SqlConnection conn = new SqlConnection(connectionString))   // create a connection
             {
                 Dictionary<int, string> zipFileNamesDB = new Dictionary<int, string>();
                 try
@@ -250,6 +384,8 @@ namespace Citi_Bike_Data_02.UI
                     lbl_Status_01.Content = "Cannot read ZIP File names from DB" +
                                             Environment.NewLine + ex.Message;
                 }
+                if (zipFileNamesDB.Count > 0)
+                    ZIPFileNamesDB = zipFileNamesDB;
                 return zipFileNamesDB;
             }
         }
@@ -282,8 +418,10 @@ namespace Citi_Bike_Data_02.UI
         /// <param name="zipFileNames"></param>
         private void AddZIPFileNamesToDB(List<string> zipFileNames)
         {
+            string connectionString = @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf; Integrated Security = True";
             // create a connection string
-            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))   // create a connection
+            //using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))   // create a connection
+            using (SqlConnection conn = new SqlConnection(connectionString))   // create a connection
             {
                 conn.Open();
                 lbl_Status_01.Content = "Writing ZIP File Names to DB: " + zipFileNames.Count;
@@ -310,7 +448,7 @@ namespace Citi_Bike_Data_02.UI
                 using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
                 {
                     bulkCopy.DestinationTableName = Properties.Resources.TableZIPFileName;
-                    lbl_Status_01.Content = "Added: " + numRows + " new ZIP file names to DB";
+                    lbl_Status_01.Content = "Added: " + dt.Rows.Count + " new ZIP file names to DB";
                     try
                     {
                         bulkCopy.WriteToServer(dt);                                                 // bulk copy data table to DB
@@ -327,8 +465,7 @@ namespace Citi_Bike_Data_02.UI
             }
         }
 
+
         #endregion
-
-
     }           // close class
 }               // close namespace
