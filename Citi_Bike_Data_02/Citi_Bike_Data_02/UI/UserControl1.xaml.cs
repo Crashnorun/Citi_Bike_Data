@@ -33,11 +33,8 @@ namespace Citi_Bike_Data_02.UI
         #region ----PROPERTIES----
 
         public XDocument XMLDocument;
-
-        public List<string> ZIPFileNamesOnline;
-
+        public List<string> ZIPFileNamesOnline = new List<string>();
         public Dictionary<int, string> ZIPFileNamesDB;
-
 
         #endregion
 
@@ -68,13 +65,13 @@ namespace Citi_Bike_Data_02.UI
             this.progressBar1.Foreground = fill;                                                                // apply brush to progress bar
 
             // Create .resx file to hold the Connection string
-            if(!System.IO.File.Exists(HelperDB.HelperDB.GetExecutingAssemblyPath() + "\\CitiBikeResources.resx"))
+            if (!System.IO.File.Exists(HelperDB.HelperDB.GetExecutingAssemblyPath() + "\\CitiBikeResources.resx"))
             {
                 using (ResXResourceWriter resxresourcewriter = new ResXResourceWriter(@".\CitiBikeResources.resx"))
                 {
                     resxresourcewriter.AddResource("DBConnectionString", "");
                 }
-            }            
+            }
 
             #region ----NOTES----
             //Hashtable resourceEntries = new Hashtable();
@@ -278,8 +275,12 @@ namespace Citi_Bike_Data_02.UI
                 lbl_Status_01.Content = "Downloaded XML Data";
             }
 
-            //if (XMLDocument != null)
-            //    ExtractZipFileList();
+            if (XMLDocument != null)
+            {
+                ExtractZipFileList(XMLDocument);
+                AddZIPFileNamesToDB(ZIPFileNamesOnline);
+            }
+            
 
             this.progressBar1.Value = 0;                                                        // reset progress bar (I think)
         }
@@ -306,9 +307,10 @@ namespace Citi_Bike_Data_02.UI
 
             List<string> zipFileNamesOnline = new List<string>();
             zipFileNamesOnline = tempFileNames.ToList();                                        // save values to list
+            ZIPFileNamesOnline = zipFileNamesOnline;
 
 #if DEBUG
-            Debug.Print("Number of ZIP files in XML File: " + zipFileNamesOnline.Count);
+        Debug.Print("Number of ZIP files in XML File: " + zipFileNamesOnline.Count);
 #endif
             return zipFileNamesOnline;
         }
@@ -388,8 +390,10 @@ namespace Citi_Bike_Data_02.UI
         /// <param name="zipFileNames"></param>
         private void AddZIPFileNamesToDB(List<string> zipFileNames)
         {
+            string connectionString = @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf; Integrated Security = True";
             // create a connection string
-            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))   // create a connection
+            //using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))   // create a connection
+            using (SqlConnection conn = new SqlConnection(connectionString))   // create a connection
             {
                 conn.Open();
                 lbl_Status_01.Content = "Writing ZIP File Names to DB: " + zipFileNames.Count;
@@ -416,7 +420,7 @@ namespace Citi_Bike_Data_02.UI
                 using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
                 {
                     bulkCopy.DestinationTableName = Properties.Resources.TableZIPFileName;
-                    lbl_Status_01.Content = "Added: " + numRows + " new ZIP file names to DB";
+                    lbl_Status_01.Content = "Added: " + dt.Rows.Count + " new ZIP file names to DB";
                     try
                     {
                         bulkCopy.WriteToServer(dt);                                                 // bulk copy data table to DB

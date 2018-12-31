@@ -1,0 +1,5 @@
+﻿CREATE TABLE ZIPFileNames
+(
+	[Id] INT NOT NULL PRIMARY KEY, 
+    [ZIPFileName] TEXT NULL
+)
