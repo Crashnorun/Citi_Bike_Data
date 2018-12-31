@@ -67,6 +67,7 @@ namespace Citi_Bike_Data_02.Helpers
         /// <summary>
         /// Gets the list of files from a directory
         /// </summary>
+        /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.getfiles?view=netframework-4.7.2</reference>
         /// <param name="DirectoryPath"> Directory Path </param>
         /// <param name="Files"> List of filenames found in directory </param>
         /// <returns> Number of files found, -1 on error </returns>
@@ -86,9 +87,21 @@ namespace Citi_Bike_Data_02.Helpers
             }
         }
 
+        public static void ReadCSVFiles(string FilePath)
+        {
+            List<string> csvData = new List<string>();
+
+            using (StreamReader reader = new StreamReader(FilePath))
+            {
+                while (!reader.EndOfStream)
+                {
+                    csvData.Add(reader.ReadLine());
+                }
+            }
+        }
+
         // open new directory
-        // count number of files
-        // get file names
+        // read csv files
         // read documents in zip file
         // save documents in zip file
         // 
