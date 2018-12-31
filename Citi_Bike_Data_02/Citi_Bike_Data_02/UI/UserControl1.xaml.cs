@@ -224,6 +224,23 @@ namespace Citi_Bike_Data_02.UI
                 lbl_Status_01.Content = "No new ZIP File Names to add";
         }
 
+        private void btn_DLZIPFiles_Click(object sender, RoutedEventArgs e)
+        {
+            if (XMLDocument == null)
+                DownloadXMLFile();
+
+            ExtractZipFileList(XMLDocument);                                                // get the xml document with zip file names
+                                                                                            // download zip files
+                                                                                            // unzip files
+
+            List<string> newZIPFileNames = new List<string>();
+            GetZIPFileNamesFromDB();                                                        // get zip file names from db
+            newZIPFileNames = CompareZIPFileNames(ZIPFileNamesOnline, ZIPFileNamesDB);       // compare current file names with stored file names
+            if (newZIPFileNames.Count > 0)                                                    // if there are new file names
+                AddZIPFileNamesToDB(newZIPFileNames);                                       // save new file names
+
+        }
+
 
         void ProgressBarChanged(object sender, EventArgs e)
         {
@@ -275,13 +292,6 @@ namespace Citi_Bike_Data_02.UI
                 lbl_Status_01.Content = "Downloaded XML Data";
             }
 
-            if (XMLDocument != null)
-            {
-                ExtractZipFileList(XMLDocument);
-                AddZIPFileNamesToDB(ZIPFileNamesOnline);
-            }
-            
-
             this.progressBar1.Value = 0;                                                        // reset progress bar (I think)
         }
 
@@ -310,7 +320,7 @@ namespace Citi_Bike_Data_02.UI
             ZIPFileNamesOnline = zipFileNamesOnline;
 
 #if DEBUG
-        Debug.Print("Number of ZIP files in XML File: " + zipFileNamesOnline.Count);
+            Debug.Print("Number of ZIP files in XML File: " + zipFileNamesOnline.Count);
 #endif
             return zipFileNamesOnline;
         }
@@ -324,7 +334,9 @@ namespace Citi_Bike_Data_02.UI
         /// <returns>List of ZIP File names in the DB. If list.count = 0, there are no file names in the DB</returns>
         private Dictionary<int, string> GetZIPFileNamesFromDB()
         {
-            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))   // create a connection
+            string connectionString = @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf; Integrated Security = True";
+            //using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))   // create a connection
+            using (SqlConnection conn = new SqlConnection(connectionString))   // create a connection
             {
                 Dictionary<int, string> zipFileNamesDB = new Dictionary<int, string>();
                 try
@@ -358,6 +370,8 @@ namespace Citi_Bike_Data_02.UI
                     lbl_Status_01.Content = "Cannot read ZIP File names from DB" +
                                             Environment.NewLine + ex.Message;
                 }
+                if (zipFileNamesDB.Count > 0)
+                    ZIPFileNamesDB = zipFileNamesDB;
                 return zipFileNamesDB;
             }
         }
@@ -439,6 +453,5 @@ namespace Citi_Bike_Data_02.UI
 
 
         #endregion
-
     }           // close class
 }               // close namespace
