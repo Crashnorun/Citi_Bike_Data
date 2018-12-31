@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.IO;
+using System.Data;
 
 namespace Citi_Bike_Data_02.Helper
 {
@@ -97,31 +98,7 @@ namespace Citi_Bike_Data_02.Helper
                 return true;
             }
         }
-
-
-        /// <summary>
-        /// Gets the list of files from a directory
-        /// </summary>
-        /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.getfiles?view=netframework-4.7.2</reference>
-        /// <param name="DirectoryPath"> Directory Path </param>
-        /// <param name="Files"> List of filenames found in directory </param>
-        /// <returns> Number of files found, -1 on error </returns>
-        public static int NumberOfUnzipedFiles(string DirectoryPath, out List<string> Files)
-        {
-            try
-            {
-                List<string> files = Directory.GetFiles(DirectoryPath).ToList();
-                Files = files;
-                return files.Count;
-            }
-            catch (Exception ex)
-            {
-                Debug.Print(ex.Message);
-                Files = null;
-                return -1;
-            }
-        }
-
+        
         /// <summary>
         /// Read teh CSV file line by line
         /// </summary>
@@ -150,6 +127,13 @@ namespace Citi_Bike_Data_02.Helper
             {
                 Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
             }
+        }
+
+        public static DataTable CreateDataTable(string FileName)
+        {
+            DataTable dt = new DataTable(FileName);
+            dt.Columns.Add();
+            return null;
         }
 
     }

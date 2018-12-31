@@ -255,6 +255,10 @@ namespace Citi_Bike_Data_02.UI
 
         }
 
+        private void btn_GetSchema_Click(object sender, RoutedEventArgs e)
+        {
+            Helper.HelperDB.GetTableSchema("ZIPFileNames");
+        }
 
         void ProgressBarChanged(object sender, EventArgs e)
         {

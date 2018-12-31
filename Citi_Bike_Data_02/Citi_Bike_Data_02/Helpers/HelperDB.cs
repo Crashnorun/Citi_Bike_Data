@@ -10,6 +10,7 @@ using System.IO;
 using System.Data;
 using System.Collections;
 using System.Resources;
+using System.Data.SqlClient;
 
 namespace Citi_Bike_Data_02.Helper
 {
@@ -25,6 +26,10 @@ namespace Citi_Bike_Data_02.Helper
      * Create CSV Table
      * Get Number of Tables
      * Add value to resources file
+     */
+
+    /*
+     * Maximum DB Sizes: https://stackoverflow.com/questions/759244/sql-server-the-maximum-number-of-rows-in-table
      */
 
     static class HelperDB
@@ -175,7 +180,7 @@ namespace Citi_Bike_Data_02.Helper
                             bool obj = (command.ExecuteScalar() != DBNull.Value);
                             if (obj)                                                            // DB exists
                             {
-                                
+
                                 DBFilePath = FindDBLocation();
                                 AddValueToResources("DBConnectionString",
                                         @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = " + DBFilePath + "; Integrated security = True;");
@@ -378,6 +383,35 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
+        public static void GetTableSchema(string TableName)
+        {
+            Dictionary<string, Type> TableSchema = new Dictionary<string, Type>();
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            SqlConnection conn = new SqlConnection(connectionString);
+            string commandText = "SELECT * FROM " + TableName;
+            SqlCommand command = new SqlCommand(commandText, conn);
+            try
+            {
+                conn.Open();
+                DataTable dt = new DataTable();
+                SqlDataAdapter adapter = new SqlDataAdapter(command);
+                adapter.Fill(dt);
 
+                foreach (DataColumn col in dt.Columns)
+                {
+                    TableSchema.Add(col.ColumnName, col.DataType);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open)
+                    conn.Close();
+
+            }
+        }
     }           // close class
 }               // close namespace
