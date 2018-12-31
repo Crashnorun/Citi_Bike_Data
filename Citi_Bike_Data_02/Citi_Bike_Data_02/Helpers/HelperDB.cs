@@ -26,6 +26,8 @@ namespace Citi_Bike_Data_02.Helper
      * Create CSV Table
      * Get Number of Tables
      * Add value to resources file
+     * Get DB Table Schema to a dictionary 
+     * Get DB Table to a DataTable
      */
 
     /*
@@ -388,7 +390,7 @@ namespace Citi_Bike_Data_02.Helper
         /// </summary>
         /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqldatareader?view=netframework-4.7.2</reference>
         /// <param name="TableName"></param>
-        public static void GetTableSchema(string TableName)
+        public static Dictionary<string,Type> GetTableSchema(string TableName)
         {
             Dictionary<string, Type> TableSchema = new Dictionary<string, Type>();
             string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
@@ -409,12 +411,14 @@ namespace Citi_Bike_Data_02.Helper
             catch (Exception ex)
             {
                 Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+                return null;
             }
             finally
             {
                 if (conn.State == ConnectionState.Open)
                     conn.Close();
             }
+            return TableSchema;
         }
 
         /// <summary>

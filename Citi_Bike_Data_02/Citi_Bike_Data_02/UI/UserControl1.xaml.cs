@@ -246,9 +246,12 @@ namespace Citi_Bike_Data_02.UI
                 for (int i = 0; i < files.Count; i++)
                 {
                     CSVData = Helper.HelperZIP.ReadCSVFile(Environment.CurrentDirectory + "\\" + files[i]);
+                    //Convert csv to datatable
+                    // populate db with datatable
+
                     Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, files[i]); // delete CSV file
 
-                    // populate db
+                    
                 }
                 Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, ZIPName); // delete ZIP file
             }
@@ -257,7 +260,7 @@ namespace Citi_Bike_Data_02.UI
 
         private void btn_GetSchema_Click(object sender, RoutedEventArgs e)
         {
-            Helper.HelperDB.GetTableSchema("ZIPFileNames");
+            Helper.HelperDB.GetTableSchema("Trips");
         }
 
         void ProgressBarChanged(object sender, EventArgs e)

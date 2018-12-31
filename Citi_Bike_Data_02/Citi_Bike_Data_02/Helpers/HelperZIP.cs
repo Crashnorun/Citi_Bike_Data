@@ -98,7 +98,7 @@ namespace Citi_Bike_Data_02.Helper
                 return true;
             }
         }
-        
+
         /// <summary>
         /// Read teh CSV file line by line
         /// </summary>
@@ -129,9 +129,41 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
-        public static DataTable CreateDataTable(string FileName)
+        public static DataTable CreateDataTableFromCSV(string FilePath)
         {
-            DataTable dt = new DataTable(FileName);
+            Dictionary<string, Type> DBSchema = new Dictionary<string, Type>();
+            DBSchema = HelperDB.GetTableSchema(Properties.Resources.TableTrips);                // get the db table schema
+
+            string fileName = Path.GetFileNameWithoutExtension(FilePath);                       // get the file name
+            DataTable dt = new DataTable(fileName);                                             // create new data table
+
+            foreach (string key in DBSchema.Keys)
+                dt.Columns.Add(key, DBSchema[key]);                                             // create columns in dt from db
+            dt.Columns.RemoveAt(0);                                                             // remove Unique ID column
+
+            List<string> csvFile = new List<string>();
+            csvFile = ReadCSVFile(FilePath);                                                    // get csv data
+
+            List<string> headerRow = new List<string>();
+            headerRow = csvFile[0].ToLower().Split(',').ToList();                               // get header rows
+
+            for (int i = 1; i < csvFile.Count; i++)                                              // skip the header row
+            {
+                List<string> trip = csvFile[i].Split(',').ToList();                             // split row into columns
+                List<object> orderedData = new List<object>();                                  // will hold the ordered data
+
+                foreach (DataColumn col in dt.Columns)
+                {
+                    int index = headerRow.FindIndex(x => x.ToLower().Equals(col.ColumnName.ToLower())); // find the matching column
+                    if (index > -1)
+                    {
+                        orderedData.Add(trip[index]);       // add found object to the ordered list
+                    }
+                }
+                dt.Rows.Add(orderedData);
+            }
+
+
             dt.Columns.Add();
             return null;
         }

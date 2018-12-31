@@ -124,6 +124,15 @@ namespace Citi_Bike_Data_02.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Trips.
+        /// </summary>
+        internal static string TableTrips {
+            get {
+                return ResourceManager.GetString("TableTrips", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ZIPFileNames.
         /// </summary>
         internal static string TableZIPFileName {

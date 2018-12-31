@@ -138,6 +138,9 @@
   <data name="TableCSVFileName" xml:space="preserve">
     <value>CSVFileNames</value>
   </data>
+  <data name="TableTrips" xml:space="preserve">
+    <value>Trips</value>
+  </data>
   <data name="TableZIPFileName" xml:space="preserve">
     <value>ZIPFileNames</value>
   </data>
