@@ -159,9 +159,9 @@ namespace Citi_Bike_Data_02.HelperDB
                         {
                             connection.Open();
                             bool obj = (command.ExecuteScalar() != DBNull.Value);
-                            if (obj)
+                            if (obj)                                                            // DB exists
                             {
-                                // DB exists
+                                
                                 DBFilePath = FindDBLocation();
                                 AddValueToResources("DBConnectionString",
                                         @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = " + DBFilePath + "; Integrated security = True;");

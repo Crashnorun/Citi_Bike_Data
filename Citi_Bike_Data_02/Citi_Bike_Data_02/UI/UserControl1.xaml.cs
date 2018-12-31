@@ -120,23 +120,23 @@ namespace Citi_Bike_Data_02.UI
             }
             else           // find the location of the db
             {
-                //https://stackoverflow.com/questions/8146207/how-to-get-current-connected-database-file-path
-                SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase);          // get the db File location
-                SqlCommand GetDataFile = new SqlCommand();
-                GetDataFile.Connection = conn;
-                GetDataFile.CommandText = "SELECT physical_name FROM sys.database_files WHERE type = 0";
-                try
-                {
-                    conn.Open();
-                    string DBFile = (string)GetDataFile.ExecuteScalar();                                    // get db file location
-                    conn.Close();
-                    Debug.Print("DB Location: " + DBFile);
-                    this.txtBlock.Text = "DB Location: " + DBFile;
-                }
-                catch (Exception ex)
-                {
-                    conn.Dispose();
-                }
+                ////https://stackoverflow.com/questions/8146207/how-to-get-current-connected-database-file-path
+                //SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase);          // get the db File location
+                //SqlCommand GetDataFile = new SqlCommand();
+                //GetDataFile.Connection = conn;
+                //GetDataFile.CommandText = "SELECT physical_name FROM sys.database_files WHERE type = 0";
+                //try
+                //{
+                //    conn.Open();
+                //    string DBFile = (string)GetDataFile.ExecuteScalar();                                    // get db file location
+                //    conn.Close();
+                //    Debug.Print("DB Location: " + DBFile);
+                //    this.txtBlock.Text = "DB Location: " + DBFile;
+                //}
+                //catch (Exception ex)
+                //{
+                //    conn.Dispose();
+                //}
             }
 
             #region ----NOTES----
