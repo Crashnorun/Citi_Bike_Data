@@ -145,27 +145,56 @@ namespace Citi_Bike_Data_02.Helper
             csvFile = ReadCSVFile(FilePath);                                                    // get csv data
 
             List<string> headerRow = new List<string>();
-            headerRow = csvFile[0].ToLower().Split(',').ToList();                               // get header rows
+            headerRow = csvFile[0].ToLower().Replace("\"", "")
+                .Replace(" ", "").Split(',').ToList();                                          // get header rows, remove spaces and quotes
 
-            for (int i = 1; i < csvFile.Count; i++)                                              // skip the header row
+            for (int i = 1; i < csvFile.Count; i++)                                             // skip the header row
             {
-                List<string> trip = csvFile[i].Split(',').ToList();                             // split row into columns
+                List<string> trip = csvFile[i].Replace("\"", "").Split(',').ToList();            // remove quotes, split row into columns
                 List<object> orderedData = new List<object>();                                  // will hold the ordered data
 
                 foreach (DataColumn col in dt.Columns)
                 {
-                    int index = headerRow.FindIndex(x => x.ToLower().Equals(col.ColumnName.ToLower())); // find the matching column
-                    if (index > -1)
+                    if (col.ColumnName.ToLower() == "date")
+                        orderedData.Add(Convert.ToDateTime(fileName));
+                    else
                     {
-                        orderedData.Add(trip[index]);       // add found object to the ordered list
+                        int index = headerRow.FindIndex(x => x.ToLower().Equals(col.ColumnName.Replace("\"", "").ToLower())); // find the matching column
+                        if (index > -1)
+                        {
+                            switch (headerRow[index])
+                            {
+                                case "tripduration":
+                                case "startstationid":
+                                case "endstationid":
+                                case "bikeid":
+                                case "birthyear":
+                                case "gender":
+                                    orderedData.Add(Convert.ToInt32(trip[index]));
+                                    break;
+                                case "starttime":
+                                case "stoptime":
+                                    orderedData.Add(Convert.ToDateTime(trip[index]));
+                                    break;
+                                case "startstationlatitude":
+                                case "startstationlongitude":
+                                case "endstationlatitude":
+                                case "endstationlongitude":
+                                    orderedData.Add(Convert.ToDouble(trip[index]));
+                                    break;
+                                default:
+                                    orderedData.Add(trip[index]);
+                                    break;
+                            }
+                            //orderedData.Add(trip[index]);       // add found object to the ordered list
+                        }
+
                     }
+
                 }
                 dt.Rows.Add(orderedData);
             }
-
-
-            dt.Columns.Add();
-            return null;
+            return dt;
         }
 
     }
