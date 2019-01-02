@@ -129,6 +129,11 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
+        /// <summary>
+        /// Create DataTable from CSV file
+        /// </summary>
+        /// <param name="FilePath">File path where the csv file is saved</param>
+        /// <returns>DataTable from the CSV file</returns>
         public static DataTable CreateDataTableFromCSV(string FilePath)
         {
             Dictionary<string, Type> DBSchema = new Dictionary<string, Type>();
@@ -193,7 +198,11 @@ namespace Citi_Bike_Data_02.Helper
             return dt;
         }
 
-
+        /// <summary>
+        /// Extract the date from the CSV file name to a DateTime
+        /// </summary>
+        /// <param name="FileName">CSV file name</param>
+        /// <returns>DateTime</returns>
         public static DateTime ExtractDateTimeFromFileName(string FileName)
         {
             string NewStr = "";
