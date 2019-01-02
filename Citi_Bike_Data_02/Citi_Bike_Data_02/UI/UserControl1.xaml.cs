@@ -249,16 +249,14 @@ namespace Citi_Bike_Data_02.UI
                     
                     //Convert csv to datatable
                     DataTable dt = Helper.HelperZIP.CreateDataTableFromCSV(Environment.CurrentDirectory + "\\" + files[i]);
-                    
+
                     // populate db with datatable
+                    Helper.HelperDB.AddDataTableToDBTable(Properties.Resources.TableTrips, dt);
 
                     Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, files[i]); // delete CSV file
-
-
                 }
                 Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, ZIPName); // delete ZIP file
             }
-
         }
 
         private void btn_GetSchema_Click(object sender, RoutedEventArgs e)

@@ -312,7 +312,6 @@ namespace Citi_Bike_Data_02.Helper
             return NewColumNames;
         }
 
-
         public static void CreateZIPTable(string ConnectionString)
         {
             // check if table exists
@@ -330,7 +329,6 @@ namespace Citi_Bike_Data_02.Helper
                 CreateNewTable(Properties.Resources.TableZIPFileName, ConnectionString, ColumnNames, ref message);     // create table
             }
         }
-
 
         public static void CreateCSVTable(string ConnectionString)
         {
@@ -390,7 +388,7 @@ namespace Citi_Bike_Data_02.Helper
         /// </summary>
         /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqldatareader?view=netframework-4.7.2</reference>
         /// <param name="TableName"></param>
-        public static Dictionary<string,Type> GetTableSchema(string TableName)
+        public static Dictionary<string, Type> GetTableSchema(string TableName)
         {
             Dictionary<string, Type> TableSchema = new Dictionary<string, Type>();
             string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
@@ -455,5 +453,26 @@ namespace Citi_Bike_Data_02.Helper
             return dt;
         }
 
+
+        public static void AddDataTableToDBTable(string TableName, DataTable dataTable)
+        {
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            SqlConnection conn = new SqlConnection(connectionString);
+            try
+            {
+                conn.Open();
+                using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
+                {
+                    foreach (DataColumn col in dataTable.Columns)
+                        bulkCopy.ColumnMappings.Add(col.ColumnName, col.ColumnName);
+                    bulkCopy.DestinationTableName = TableName;
+                    bulkCopy.WriteToServer(dataTable);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+            }
+        }
     }           // close class
 }               // close namespace

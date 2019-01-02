@@ -156,7 +156,7 @@ namespace Citi_Bike_Data_02.Helper
                 foreach (DataColumn col in dt.Columns)
                 {
                     if (col.ColumnName.ToLower() == "date")
-                        dr[col.ColumnName] = Convert.ToDateTime(fileName.Split(' ')[0]);
+                        dr[col.ColumnName] = ExtractDateTimeFromFileName(fileName);
                     else
                     {
                         int index = headerRow.FindIndex(x => x.ToLower().Equals(col.ColumnName.Replace("\"", "").ToLower())); // find the matching column
@@ -168,7 +168,6 @@ namespace Citi_Bike_Data_02.Helper
                                 case "startstationid":
                                 case "endstationid":
                                 case "bikeid":
-                                case "birthyear":
                                 case "gender":
                                     dr[col.ColumnName] = Convert.ToInt32(trip[index]);
                                     break;
@@ -194,5 +193,19 @@ namespace Citi_Bike_Data_02.Helper
             return dt;
         }
 
+
+        public static DateTime ExtractDateTimeFromFileName(string FileName)
+        {
+            string NewStr = "";
+            foreach (char c in FileName)
+            {
+                if (Char.IsNumber(c))                                   // keep only the numbers
+                    NewStr += c;
+            }
+
+            int year = Convert.ToInt32(NewStr.Substring(0, 4));         // first 4 characters are the year
+            int month = Convert.ToInt32(NewStr.Substring(4, 2));        // last 2 characters are the month
+            return new DateTime(year, month, 1);
+        }
     }
 }
