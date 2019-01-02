@@ -16,14 +16,12 @@ namespace Citi_Bike_Data_02.Helper
      * Unzip File - return list of csv file names in the zip file
      * Read CSV
      * Delete file
+     * Create DataTable From CSV
+     * ExtractDateTimeFromFileName
      */
 
     /* 
-     * Create function that creates a Datatable
-     *      Match columns in datatable with columns in CSV file
-     *      Need a datatable schema -> convert headers accordingly
-     *      Convert csv data into data table
-     * Populate data into DB
+     * Need to add Unique ID Key column to data table
      */
 
     public static class HelperZIP
