@@ -1,1 +1,2 @@
 ﻿DELETE FROM Trips;
+DBCC SHRINKDATABASE (CitiBikeData, 10);
