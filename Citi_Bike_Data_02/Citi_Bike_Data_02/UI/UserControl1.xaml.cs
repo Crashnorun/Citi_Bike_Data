@@ -245,16 +245,25 @@ namespace Citi_Bike_Data_02.UI
 
                 for (int i = 0; i < files.Count; i++)
                 {
-                    CSVData = Helper.HelperZIP.ReadCSVFile(Environment.CurrentDirectory + "\\" + files[i]);
-                    Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, files[i]); // delete CSV file
+                    // CSVData = Helper.HelperZIP.ReadCSVFile(Environment.CurrentDirectory + "\\" + files[i]);
+                    int num = Helper.HelperDB.GetLastTableID(Properties.Resources.TableTrips);
 
-                    // populate db
+                    //Convert csv to datatable
+                    DataTable dt = Helper.HelperZIP.CreateDataTableFromCSV(Environment.CurrentDirectory + "\\" + files[i], num + 1);
+
+                    // populate db with datatable
+                    Helper.HelperDB.AddDataTableToDBTable(Properties.Resources.TableTrips, dt);
+
+                    Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, files[i]); // delete CSV file
                 }
                 Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, ZIPName); // delete ZIP file
             }
-
         }
 
+        private void btn_GetSchema_Click(object sender, RoutedEventArgs e)
+        {
+            Helper.HelperDB.GetTableSchema("Trips");
+        }
 
         void ProgressBarChanged(object sender, EventArgs e)
         {

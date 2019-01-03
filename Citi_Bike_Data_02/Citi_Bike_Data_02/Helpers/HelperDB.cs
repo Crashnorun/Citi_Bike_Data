@@ -10,6 +10,7 @@ using System.IO;
 using System.Data;
 using System.Collections;
 using System.Resources;
+using System.Data.SqlClient;
 
 namespace Citi_Bike_Data_02.Helper
 {
@@ -25,6 +26,13 @@ namespace Citi_Bike_Data_02.Helper
      * Create CSV Table
      * Get Number of Tables
      * Add value to resources file
+     * Get DB Table Schema to a dictionary 
+     * Get DB Table to a DataTable
+     * Add a DataTable To DB Table 
+     */
+
+    /*
+     * Maximum DB Sizes: https://stackoverflow.com/questions/759244/sql-server-the-maximum-number-of-rows-in-table
      */
 
     static class HelperDB
@@ -175,7 +183,7 @@ namespace Citi_Bike_Data_02.Helper
                             bool obj = (command.ExecuteScalar() != DBNull.Value);
                             if (obj)                                                            // DB exists
                             {
-                                
+
                                 DBFilePath = FindDBLocation();
                                 AddValueToResources("DBConnectionString",
                                         @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = " + DBFilePath + "; Integrated security = True;");
@@ -265,7 +273,6 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
-
         /// <summary>
         /// Convert dictionary of C# types to dictionary of SQL types
         /// </summary>
@@ -305,7 +312,6 @@ namespace Citi_Bike_Data_02.Helper
             return NewColumNames;
         }
 
-
         public static void CreateZIPTable(string ConnectionString)
         {
             // check if table exists
@@ -323,7 +329,6 @@ namespace Citi_Bike_Data_02.Helper
                 CreateNewTable(Properties.Resources.TableZIPFileName, ConnectionString, ColumnNames, ref message);     // create table
             }
         }
-
 
         public static void CreateCSVTable(string ConnectionString)
         {
@@ -352,14 +357,14 @@ namespace Citi_Bike_Data_02.Helper
                     if (conn.State != System.Data.ConnectionState.Open)                         // check if it's open
                         conn.Open();
                     DataTable schema = conn.GetSchema("Tables");
-                    conn.Close();
                     return schema.Rows.Count;
                 }
                 catch (Exception ex)
                 {
-                    conn.Close();
                     Debug.Print("Could not get the number of tables in the DB" + Environment.NewLine + ex.Message);
                 }
+                if (conn.State == ConnectionState.Open)
+                    conn.Close();
             }
             return 0;
         }
@@ -378,6 +383,134 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
+        /// <summary>
+        /// Get a DB Table Schema
+        /// </summary>
+        /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqldatareader?view=netframework-4.7.2</reference>
+        /// <param name="TableName"></param>
+        public static Dictionary<string, Type> GetTableSchema(string TableName)
+        {
+            Dictionary<string, Type> TableSchema = new Dictionary<string, Type>();
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            SqlConnection conn = new SqlConnection(connectionString);
+            string commandText = "SELECT * FROM " + TableName;
+            SqlCommand command = new SqlCommand(commandText, conn);
+
+            try
+            {
+                conn.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                for (int i = 0; i < reader.VisibleFieldCount; i++)
+                {
+                    TableSchema.Add(reader.GetName(i), reader.GetFieldType(i));
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+                return null;
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open)
+                    conn.Close();
+            }
+            return TableSchema;
+        }
+
+        /// <summary>
+        /// Copy a SQL table into a DataTable
+        /// </summary>
+        /// <reference>https://stackoverflow.com/questions/6073382/read-sql-table-into-c-sharp-datatable</reference>
+        /// <param name="TableName"></param>
+        /// <returns></returns>
+        public static DataTable GetDBTable(string TableName)
+        {
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            SqlConnection conn = new SqlConnection(connectionString);
+            string commandText = "SELECT * FROM " + TableName;
+            SqlCommand command = new SqlCommand(commandText, conn);
+            DataTable dt = new DataTable();
+
+            try
+            {
+                conn.Open();
+
+                SqlDataAdapter adapter = new SqlDataAdapter(command);
+                adapter.Fill(dt);
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+                return null;
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open)
+                    conn.Close();
+            }
+            return dt;
+        }
+
+        /// <summary>
+        /// Add a Datatable to the end of a table in the DB
+        /// </summary>
+        /// <param name="TableName">Table name</param>
+        /// <param name="dataTable">Data table</param>
+        public static void AddDataTableToDBTable(string TableName, DataTable dataTable)
+        {
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            SqlConnection conn = new SqlConnection(connectionString);
+            try
+            {
+                conn.Open();
+                using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
+                {
+                    foreach (DataColumn col in dataTable.Columns)
+                        bulkCopy.ColumnMappings.Add(col.ColumnName, col.ColumnName);        // copy the column mapping
+                    bulkCopy.DestinationTableName = TableName;                              // set destination
+                    bulkCopy.WriteToServer(dataTable);                                      // write to DB
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+            }
+            if (conn.State == ConnectionState.Open)
+                conn.Close();
+        }
+
+        /// <summary>
+        /// Get the last Unique Id from a table in the DB
+        /// </summary>
+        /// <param name="TableName">Table name</param>
+        /// <returns>-1 = failure, 0 = no entries, integer = last Unique Id</returns>
+        public static int GetLastTableID(string TableName)
+        {
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            SqlConnection conn = new SqlConnection(connectionString);
+            string commandText = "SELECT MAX (Id) FROM " + TableName;           // select max Id from table
+            SqlCommand command = new SqlCommand(commandText, conn);
+            int num = -1;                                                       // default -1 value
+
+            try
+            {
+                conn.Open();
+                var obj = command.ExecuteScalar();
+                if (obj == System.DBNull.Value)                                 // if the return value is null
+                    num = 0;                                                    // return 0
+                else
+                    num = Convert.ToInt32(obj);                                 // convert value to int
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+            }
+            if (conn.State == ConnectionState.Open)
+                conn.Close();
+            return num;
+        }
 
     }           // close class
 }               // close namespace

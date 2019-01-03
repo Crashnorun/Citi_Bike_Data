@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.IO;
+using System.Data;
 
 namespace Citi_Bike_Data_02.Helper
 {
@@ -15,14 +16,12 @@ namespace Citi_Bike_Data_02.Helper
      * Unzip File - return list of csv file names in the zip file
      * Read CSV
      * Delete file
+     * Create DataTable From CSV
+     * ExtractDateTimeFromFileName
      */
 
     /* 
-     * Create function that creates a Datatable
-     *      Match columns in datatable with columns in CSV file
-     *      Need a datatable schema -> convert headers accordingly
-     *      Convert csv data into data table
-     * Populate data into DB
+     * Need to add Unique ID Key column to data table
      */
 
     public static class HelperZIP
@@ -98,30 +97,6 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
-
-        /// <summary>
-        /// Gets the list of files from a directory
-        /// </summary>
-        /// <reference>https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.getfiles?view=netframework-4.7.2</reference>
-        /// <param name="DirectoryPath"> Directory Path </param>
-        /// <param name="Files"> List of filenames found in directory </param>
-        /// <returns> Number of files found, -1 on error </returns>
-        public static int NumberOfUnzipedFiles(string DirectoryPath, out List<string> Files)
-        {
-            try
-            {
-                List<string> files = Directory.GetFiles(DirectoryPath).ToList();
-                Files = files;
-                return files.Count;
-            }
-            catch (Exception ex)
-            {
-                Debug.Print(ex.Message);
-                Files = null;
-                return -1;
-            }
-        }
-
         /// <summary>
         /// Read teh CSV file line by line
         /// </summary>
@@ -152,5 +127,94 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
+        /// <summary>
+        /// Create DataTable from CSV file
+        /// </summary>
+        /// <param name="FilePath">File path where the csv file is saved</param>
+        /// <param name="StartingUniqueId"></param>
+        /// <returns>DataTable from the CSV file</returns>
+        public static DataTable CreateDataTableFromCSV(string FilePath, int StartingUniqueId)
+        {
+            Dictionary<string, Type> DBSchema = new Dictionary<string, Type>();
+            DBSchema = HelperDB.GetTableSchema(Properties.Resources.TableTrips);                // get the db table schema
+
+            string fileName = Path.GetFileNameWithoutExtension(FilePath);                       // get the file name
+            DataTable dt = new DataTable(fileName);                                             // create new data table
+
+            foreach (string key in DBSchema.Keys)
+                dt.Columns.Add(key, DBSchema[key]);                                             // create columns in dt from db
+
+            List<string> csvFile = new List<string>();
+            csvFile = ReadCSVFile(FilePath);                                                    // get csv data
+
+            List<string> headerRow = new List<string>();
+            headerRow = csvFile[0].ToLower().Replace("\"", "")
+                .Replace(" ", "").Split(',').ToList();                                          // get header rows, remove spaces and quotes
+
+            for (int i = 1; i < csvFile.Count; i++)                                             // skip the header row
+            {
+                DataRow dr = dt.NewRow();                                                       // will hold the ordered data
+                List<string> trip = csvFile[i].Replace("\"", "").Split(',').ToList();           // remove quotes, split row into columns
+
+                foreach (DataColumn col in dt.Columns)
+                {
+                    if (col.ColumnName.ToLower() == "id")
+                        dr[col.ColumnName] = StartingUniqueId + i - 1;
+                    else if (col.ColumnName.ToLower() == "date")
+                        dr[col.ColumnName] = ExtractDateTimeFromFileName(fileName);
+                    else
+                    {
+                        int index = headerRow.FindIndex(x => x.ToLower().Equals(col.ColumnName.Replace("\"", "").ToLower())); // find the matching column
+                        if (index > -1)
+                        {
+                            switch (headerRow[index])
+                            {
+                                case "tripduration":
+                                case "startstationid":
+                                case "endstationid":
+                                case "bikeid":
+                                case "gender":
+                                    dr[col.ColumnName] = Convert.ToInt32(trip[index]);
+                                    break;
+                                case "starttime":
+                                case "stoptime":
+                                    dr[col.ColumnName] = Convert.ToDateTime(trip[index]);
+                                    break;
+                                case "startstationlatitude":
+                                case "startstationlongitude":
+                                case "endstationlatitude":
+                                case "endstationlongitude":
+                                    dr[col.ColumnName] = Convert.ToDouble(trip[index]);
+                                    break;
+                                default:
+                                    dr[col.ColumnName] = trip[index];
+                                    break;
+                            }
+                        }
+                    }
+                }
+                dt.Rows.Add(dr);
+            }
+            return dt;
+        }
+
+        /// <summary>
+        /// Extract the date from the CSV file name to a DateTime
+        /// </summary>
+        /// <param name="FileName">CSV file name</param>
+        /// <returns>DateTime</returns>
+        public static DateTime ExtractDateTimeFromFileName(string FileName)
+        {
+            string NewStr = "";
+            foreach (char c in FileName)
+            {
+                if (Char.IsNumber(c))                                   // keep only the numbers
+                    NewStr += c;
+            }
+
+            int year = Convert.ToInt32(NewStr.Substring(0, 4));         // first 4 characters are the year
+            int month = Convert.ToInt32(NewStr.Substring(4, 2));        // last 2 characters are the month
+            return new DateTime(year, month, 1);
+        }
     }
 }

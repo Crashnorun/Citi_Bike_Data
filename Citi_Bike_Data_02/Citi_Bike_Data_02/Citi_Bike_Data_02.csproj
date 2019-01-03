@@ -75,6 +75,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Classes\cls_CSVFile.cs" />
+    <Compile Include="Classes\cls_Gender.cs" />
+    <Compile Include="Classes\cls_Station.cs" />
+    <Compile Include="Classes\cls_Trip.cs" />
+    <Compile Include="Classes\cls_User.cs" />
+    <Compile Include="Classes\cls_UserType.cs" />
     <Compile Include="Classes\cls_ZIPFile.cs" />
     <Compile Include="Helpers\HelperDB.cs" />
     <Compile Include="Helpers\HelperZIP.cs" />
