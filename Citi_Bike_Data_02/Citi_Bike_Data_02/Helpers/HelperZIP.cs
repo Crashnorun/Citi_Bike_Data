@@ -34,8 +34,9 @@ namespace Citi_Bike_Data_02.Helper
         /// <returns>TRUE = success, FALSE = failure</returns>
         public static bool DownloadZIPFile(string FileName)
         {
-            // Example url: https://s3.amazonaws.com/tripdata/201306-citibike-tripdata.zip
-            // construct url
+            Debug.Print("DOWNLOADING ZIP FILE: " + FileName);
+
+            // construct url, Example url: https://s3.amazonaws.com/tripdata/201306-citibike-tripdata.zip
             string url = Properties.Resources.URLXML + "/" + FileName;
             string path = Environment.CurrentDirectory + "\\" + FileName;
 
@@ -63,6 +64,7 @@ namespace Citi_Bike_Data_02.Helper
         /// <param name="FilePath">File path where document(s) saved</param>
         public static bool UnZIPFile(string FileName, out List<string> FilePaths)
         {
+            Debug.Print("EXTRACTING CSV FILES");
             string path = Environment.CurrentDirectory + "\\" + FileName;
             List<string> fileNames = new List<string>();
 
@@ -117,6 +119,7 @@ namespace Citi_Bike_Data_02.Helper
         /// <param name="fileName"></param>
         public static void DeleteFile(string DirectoryPath, string fileName)
         {
+            Debug.Print("DDELETING FILE: " + fileName);
             try
             {
                 File.Delete(DirectoryPath + "\\" + fileName);
@@ -135,6 +138,7 @@ namespace Citi_Bike_Data_02.Helper
         /// <returns>DataTable from the CSV file</returns>
         public static DataTable CreateDataTableFromCSV(string FilePath, int StartingUniqueId)
         {
+            Debug.Print("CONVERTING CSV: " + FilePath + " INTO DATATABLE");
             Dictionary<string, Type> DBSchema = new Dictionary<string, Type>();
             DBSchema = HelperDB.GetTableSchema(Properties.Resources.TableTrips);                // get the db table schema
 
@@ -174,17 +178,26 @@ namespace Citi_Bike_Data_02.Helper
                                 case "endstationid":
                                 case "bikeid":
                                 case "gender":
-                                    dr[col.ColumnName] = Convert.ToInt32(trip[index]);
+                                    if (trip[index].ToUpper() == "NULL")
+                                        dr[col.ColumnName] = -1;                // insert -1 for nulls
+                                    else
+                                        dr[col.ColumnName] = Convert.ToInt32(trip[index]);
                                     break;
                                 case "starttime":
                                 case "stoptime":
-                                    dr[col.ColumnName] = Convert.ToDateTime(trip[index]);
+                                    if (trip[index].ToUpper() == "NULL")
+                                        dr[col.ColumnName] = new DateTime();
+                                    else
+                                        dr[col.ColumnName] = Convert.ToDateTime(trip[index]);
                                     break;
                                 case "startstationlatitude":
                                 case "startstationlongitude":
                                 case "endstationlatitude":
                                 case "endstationlongitude":
-                                    dr[col.ColumnName] = Convert.ToDouble(trip[index]);
+                                    if (trip[index].ToUpper() == "NULL")
+                                        dr[col.ColumnName] = -1;
+                                    else
+                                        dr[col.ColumnName] = Convert.ToDouble(trip[index]);
                                     break;
                                 default:
                                     dr[col.ColumnName] = trip[index];

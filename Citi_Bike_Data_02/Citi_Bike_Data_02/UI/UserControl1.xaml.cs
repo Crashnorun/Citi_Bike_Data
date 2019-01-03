@@ -245,7 +245,6 @@ namespace Citi_Bike_Data_02.UI
 
                 for (int i = 0; i < files.Count; i++)
                 {
-                    // CSVData = Helper.HelperZIP.ReadCSVFile(Environment.CurrentDirectory + "\\" + files[i]);
                     int num = Helper.HelperDB.GetLastTableID(Properties.Resources.TableTrips);
 
                     //Convert csv to datatable
@@ -253,6 +252,8 @@ namespace Citi_Bike_Data_02.UI
 
                     // populate db with datatable
                     Helper.HelperDB.AddDataTableToDBTable(Properties.Resources.TableTrips, dt);
+
+                    // add csv file name to CSV file Table
 
                     Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, files[i]); // delete CSV file
                 }
@@ -290,6 +291,7 @@ namespace Citi_Bike_Data_02.UI
         /// </summary>
         private void DownloadXMLFile()
         {
+            Debug.Print("DOWNLOADING XML FILE");
             // get executing assembly file path
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;                         // path in URI format
             UriBuilder uri = new UriBuilder(codeBase);
@@ -314,7 +316,6 @@ namespace Citi_Bike_Data_02.UI
                 XMLDocument.Save(localPath + "\\XMLDoc.xml");                                   // save the xml doc
                 lbl_Status_01.Content = "Downloaded XML Data";
             }
-
             this.progressBar1.Value = 0;                                                        // reset progress bar (I think)
         }
 
@@ -325,6 +326,7 @@ namespace Citi_Bike_Data_02.UI
         /// <returns>List of ZIP file names</returns>
         private List<string> ExtractZipFileList(XDocument xmlDocument)
         {
+            Debug.Print("EXTRACTING ZIP FILE NAMES FROM XML");
             //var tempFileNames = from keys in XMLDocument.Descendants().ToList()                     // from all the nodes in the xml file
             //                    where keys.Name.LocalName == "Key" && !keys.Value.Contains("JC")    // select the child nodes with zip files, excluding JC
             //                    select keys.Value;
@@ -342,9 +344,8 @@ namespace Citi_Bike_Data_02.UI
             zipFileNamesOnline = tempFileNames.ToList();                                        // save values to list
             ZIPFileNamesOnline = zipFileNamesOnline;
 
-#if DEBUG
             Debug.Print("Number of ZIP files in XML File: " + zipFileNamesOnline.Count);
-#endif
+
             return zipFileNamesOnline;
         }
 

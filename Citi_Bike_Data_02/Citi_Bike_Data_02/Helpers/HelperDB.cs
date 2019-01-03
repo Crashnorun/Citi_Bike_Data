@@ -390,6 +390,7 @@ namespace Citi_Bike_Data_02.Helper
         /// <param name="TableName"></param>
         public static Dictionary<string, Type> GetTableSchema(string TableName)
         {
+            Debug.Print("GETTING DB TABLE: " + TableName + " SCHEMA");
             Dictionary<string, Type> TableSchema = new Dictionary<string, Type>();
             string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
             SqlConnection conn = new SqlConnection(connectionString);
@@ -402,9 +403,7 @@ namespace Citi_Bike_Data_02.Helper
                 SqlDataReader reader = command.ExecuteReader();
 
                 for (int i = 0; i < reader.VisibleFieldCount; i++)
-                {
                     TableSchema.Add(reader.GetName(i), reader.GetFieldType(i));
-                }
             }
             catch (Exception ex)
             {
@@ -460,6 +459,7 @@ namespace Citi_Bike_Data_02.Helper
         /// <param name="dataTable">Data table</param>
         public static void AddDataTableToDBTable(string TableName, DataTable dataTable)
         {
+            Debug.Print("ADDING DATATABLE: " + dataTable.TableName + " INTO DB TABLE: " + TableName);
             string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
             SqlConnection conn = new SqlConnection(connectionString);
             try
@@ -488,6 +488,7 @@ namespace Citi_Bike_Data_02.Helper
         /// <returns>-1 = failure, 0 = no entries, integer = last Unique Id</returns>
         public static int GetLastTableID(string TableName)
         {
+            Debug.Print("GETTING LAST UNIQUE ID FROM TABLE: " + TableName);
             string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
             SqlConnection conn = new SqlConnection(connectionString);
             string commandText = "SELECT MAX (Id) FROM " + TableName;           // select max Id from table
@@ -509,6 +510,9 @@ namespace Citi_Bike_Data_02.Helper
             }
             if (conn.State == ConnectionState.Open)
                 conn.Close();
+
+            Debug.Print(num.ToString() + " ENTERIES IN TABLE: " + TableName);
+
             return num;
         }
 
