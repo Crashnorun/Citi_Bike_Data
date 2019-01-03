@@ -235,6 +235,9 @@ namespace Citi_Bike_Data_02.UI
 
             ExtractZipFileList(XMLDocument);                                                    // get the xml document with zip file names
 
+            Dictionary<string, Type> DBSchema = new Dictionary<string, Type>();
+            DBSchema = Helper.HelperDB.GetTableSchema(Properties.Resources.TableTrips);         // get the db table schema
+
             foreach (string ZIPName in ZIPFileNamesOnline)
             {
                 if (!Helper.HelperZIP.DownloadZIPFile(ZIPName))                                 // download zip files
@@ -248,7 +251,8 @@ namespace Citi_Bike_Data_02.UI
                     int num = Helper.HelperDB.GetLastTableID(Properties.Resources.TableTrips);
 
                     //Convert csv to datatable
-                    DataTable dt = Helper.HelperZIP.CreateDataTableFromCSV(Environment.CurrentDirectory + "\\" + files[i], num + 1);
+                    DataTable dt = Helper.HelperZIP.CreateDataTableFromCSV(Environment.CurrentDirectory + "\\" + files[i],
+                        num + 1, DBSchema);
 
                     // populate db with datatable
                     Helper.HelperDB.AddDataTableToDBTable(Properties.Resources.TableTrips, dt);

@@ -136,11 +136,11 @@ namespace Citi_Bike_Data_02.Helper
         /// <param name="FilePath">File path where the csv file is saved</param>
         /// <param name="StartingUniqueId"></param>
         /// <returns>DataTable from the CSV file</returns>
-        public static DataTable CreateDataTableFromCSV(string FilePath, int StartingUniqueId)
+        public static DataTable CreateDataTableFromCSV(string FilePath, int StartingUniqueId, Dictionary<string,Type> DBSchema)
         {
             Debug.Print("CONVERTING CSV: " + FilePath + " INTO DATATABLE");
-            Dictionary<string, Type> DBSchema = new Dictionary<string, Type>();
-            DBSchema = HelperDB.GetTableSchema(Properties.Resources.TableTrips);                // get the db table schema
+            //Dictionary<string, Type> DBSchema = new Dictionary<string, Type>();
+            //DBSchema = HelperDB.GetTableSchema(Properties.Resources.TableTrips);                // get the db table schema
 
             string fileName = Path.GetFileNameWithoutExtension(FilePath);                       // get the file name
             DataTable dt = new DataTable(fileName);                                             // create new data table
