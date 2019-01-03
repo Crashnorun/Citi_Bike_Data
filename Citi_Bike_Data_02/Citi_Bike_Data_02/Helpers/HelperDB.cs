@@ -28,7 +28,7 @@ namespace Citi_Bike_Data_02.Helper
      * Add value to resources file
      * Get DB Table Schema to a dictionary 
      * Get DB Table to a DataTable
-     * Add a DataTable To DB Table <-- needs to be tested
+     * Add a DataTable To DB Table 
      */
 
     /*
@@ -273,7 +273,6 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
-
         /// <summary>
         /// Convert dictionary of C# types to dictionary of SQL types
         /// </summary>
@@ -358,14 +357,14 @@ namespace Citi_Bike_Data_02.Helper
                     if (conn.State != System.Data.ConnectionState.Open)                         // check if it's open
                         conn.Open();
                     DataTable schema = conn.GetSchema("Tables");
-                    conn.Close();
                     return schema.Rows.Count;
                 }
                 catch (Exception ex)
                 {
-                    conn.Close();
                     Debug.Print("Could not get the number of tables in the DB" + Environment.NewLine + ex.Message);
                 }
+                if (conn.State == ConnectionState.Open)
+                    conn.Close();
             }
             return 0;
         }
@@ -454,7 +453,11 @@ namespace Citi_Bike_Data_02.Helper
             return dt;
         }
 
-
+        /// <summary>
+        /// Add a Datatable to the end of a table in the DB
+        /// </summary>
+        /// <param name="TableName">Table name</param>
+        /// <param name="dataTable">Data table</param>
         public static void AddDataTableToDBTable(string TableName, DataTable dataTable)
         {
             string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
@@ -465,17 +468,24 @@ namespace Citi_Bike_Data_02.Helper
                 using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
                 {
                     foreach (DataColumn col in dataTable.Columns)
-                        bulkCopy.ColumnMappings.Add(col.ColumnName, col.ColumnName);
-                    bulkCopy.DestinationTableName = TableName;
-                    bulkCopy.WriteToServer(dataTable);
+                        bulkCopy.ColumnMappings.Add(col.ColumnName, col.ColumnName);        // copy the column mapping
+                    bulkCopy.DestinationTableName = TableName;                              // set destination
+                    bulkCopy.WriteToServer(dataTable);                                      // write to DB
                 }
             }
             catch (Exception ex)
             {
                 Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
             }
+            if (conn.State == ConnectionState.Open)
+                conn.Close();
         }
 
+        /// <summary>
+        /// Get the last Unique Id from a table in the DB
+        /// </summary>
+        /// <param name="TableName">Table name</param>
+        /// <returns>-1 = failure, 0 = no entries, integer = last Unique Id</returns>
         public static int GetLastTableID(string TableName)
         {
             string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
@@ -497,7 +507,8 @@ namespace Citi_Bike_Data_02.Helper
             {
                 Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
             }
-            conn.Close();
+            if (conn.State == ConnectionState.Open)
+                conn.Close();
             return num;
         }
 

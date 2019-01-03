@@ -226,9 +226,6 @@ namespace Citi_Bike_Data_02.UI
 
         private void btn_DLZIPFiles_Click(object sender, RoutedEventArgs e)
         {
-            int num2 = Helper.HelperDB.GetLastTableID(Properties.Resources.TableZIPFileName);
-            int num =  Helper.HelperDB.GetLastTableID(Properties.Resources.TableTrips);
-
             string path; // = Environment.CurrentDirectory + "\\" + name;
             List<string> files = new List<string>();
             List<string> CSVData = new List<string>();
@@ -249,9 +246,10 @@ namespace Citi_Bike_Data_02.UI
                 for (int i = 0; i < files.Count; i++)
                 {
                     // CSVData = Helper.HelperZIP.ReadCSVFile(Environment.CurrentDirectory + "\\" + files[i]);
-                    
+                    int num = Helper.HelperDB.GetLastTableID(Properties.Resources.TableTrips);
+
                     //Convert csv to datatable
-                    DataTable dt = Helper.HelperZIP.CreateDataTableFromCSV(Environment.CurrentDirectory + "\\" + files[i]);
+                    DataTable dt = Helper.HelperZIP.CreateDataTableFromCSV(Environment.CurrentDirectory + "\\" + files[i], num + 1);
 
                     // populate db with datatable
                     Helper.HelperDB.AddDataTableToDBTable(Properties.Resources.TableTrips, dt);

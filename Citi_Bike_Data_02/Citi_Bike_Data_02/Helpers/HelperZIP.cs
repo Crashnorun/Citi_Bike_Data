@@ -131,8 +131,9 @@ namespace Citi_Bike_Data_02.Helper
         /// Create DataTable from CSV file
         /// </summary>
         /// <param name="FilePath">File path where the csv file is saved</param>
+        /// <param name="StartingUniqueId"></param>
         /// <returns>DataTable from the CSV file</returns>
-        public static DataTable CreateDataTableFromCSV(string FilePath)
+        public static DataTable CreateDataTableFromCSV(string FilePath, int StartingUniqueId)
         {
             Dictionary<string, Type> DBSchema = new Dictionary<string, Type>();
             DBSchema = HelperDB.GetTableSchema(Properties.Resources.TableTrips);                // get the db table schema
@@ -142,7 +143,6 @@ namespace Citi_Bike_Data_02.Helper
 
             foreach (string key in DBSchema.Keys)
                 dt.Columns.Add(key, DBSchema[key]);                                             // create columns in dt from db
-            dt.Columns.RemoveAt(0);                                                             // remove Unique ID column
 
             List<string> csvFile = new List<string>();
             csvFile = ReadCSVFile(FilePath);                                                    // get csv data
@@ -158,7 +158,9 @@ namespace Citi_Bike_Data_02.Helper
 
                 foreach (DataColumn col in dt.Columns)
                 {
-                    if (col.ColumnName.ToLower() == "date")
+                    if (col.ColumnName.ToLower() == "id")
+                        dr[col.ColumnName] = StartingUniqueId + i - 1;
+                    else if (col.ColumnName.ToLower() == "date")
                         dr[col.ColumnName] = ExtractDateTimeFromFileName(fileName);
                     else
                     {
