@@ -475,5 +475,31 @@ namespace Citi_Bike_Data_02.Helper
                 Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
             }
         }
+
+        public static int GetLastTableID(string TableName)
+        {
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            SqlConnection conn = new SqlConnection(connectionString);
+            string commandText = "SELECT MAX (Id) FROM " + TableName;           // select max Id from table
+            SqlCommand command = new SqlCommand(commandText, conn);
+            int num = -1;                                                       // default -1 value
+
+            try
+            {
+                conn.Open();
+                var obj = command.ExecuteScalar();
+                if (obj == System.DBNull.Value)                                 // if the return value is null
+                    num = 0;                                                    // return 0
+                else
+                    num = Convert.ToInt32(obj);                                 // convert value to int
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+            }
+            conn.Close();
+            return num;
+        }
+
     }           // close class
 }               // close namespace

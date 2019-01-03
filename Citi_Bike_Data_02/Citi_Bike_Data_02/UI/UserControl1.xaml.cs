@@ -226,6 +226,9 @@ namespace Citi_Bike_Data_02.UI
 
         private void btn_DLZIPFiles_Click(object sender, RoutedEventArgs e)
         {
+            int num2 = Helper.HelperDB.GetLastTableID(Properties.Resources.TableZIPFileName);
+            int num =  Helper.HelperDB.GetLastTableID(Properties.Resources.TableTrips);
+
             string path; // = Environment.CurrentDirectory + "\\" + name;
             List<string> files = new List<string>();
             List<string> CSVData = new List<string>();
