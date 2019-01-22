@@ -119,7 +119,7 @@ namespace Citi_Bike_Data_02.Helper
         /// <param name="fileName"></param>
         public static void DeleteFile(string DirectoryPath, string fileName)
         {
-            Debug.Print("DDELETING FILE: " + fileName);
+            Debug.Print("DELETING FILE: " + fileName);
             try
             {
                 File.Delete(DirectoryPath + "\\" + fileName);

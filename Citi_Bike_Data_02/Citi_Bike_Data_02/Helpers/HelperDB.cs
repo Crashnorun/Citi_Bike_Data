@@ -467,8 +467,8 @@ namespace Citi_Bike_Data_02.Helper
                 conn.Open();
                 using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
                 {
-                    foreach (DataColumn col in dataTable.Columns)
-                        bulkCopy.ColumnMappings.Add(col.ColumnName, col.ColumnName);        // copy the column mapping
+                    //foreach (DataColumn col in dataTable.Columns)
+                       // bulkCopy.ColumnMappings.Add(col.ColumnName, col.ColumnName);        // copy the column mapping
                     bulkCopy.DestinationTableName = TableName;                              // set destination
                     bulkCopy.WriteToServer(dataTable);                                      // write to DB
                 }
@@ -516,5 +516,30 @@ namespace Citi_Bike_Data_02.Helper
             return num;
         }
 
+
+        public static void CleanDB()
+        {
+            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            SqlConnection conn = new SqlConnection(connectionString);
+            conn.Open();
+
+            string sql = @"DELETE FROM Trips;";
+            SqlCommand cmd = new SqlCommand(sql, conn);
+            cmd.ExecuteNonQuery();
+
+            sql = "ALTER DATABASE CitiBikeData SET RECOVERY SIMPLE;";
+            cmd = new SqlCommand(sql, conn);
+            cmd.ExecuteNonQuery();
+
+            sql = "DBCC SHRINKDATABASE (CitiBikeData, 10);";
+            cmd = new SqlCommand(sql, conn);
+            cmd.ExecuteNonQuery();
+
+            sql = "DBCC SHRINKDATAFILE (CitiBikeData.ldf, 10);";
+            cmd = new SqlCommand(sql, conn);
+            cmd.ExecuteNonQuery();
+
+            conn.Close();
+        }
     }           // close class
 }               // close namespace
