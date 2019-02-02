@@ -28,6 +28,9 @@ namespace Citi_Bike_Data_02.Helper
      * Get DB Table Schema to a dictionary 
      * Get DB Table to a DataTable
      * Add a DataTable To DB Table 
+     * Delete Rows
+     * Shrink DB
+     * Shrink Log
      */
 
     /*

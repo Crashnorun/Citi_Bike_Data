@@ -72,6 +72,10 @@ namespace Citi_Bike_Data_02.UI
                     resxresourcewriter.AddResource("DBConnectionString", "");
                 }
             }
+            btn_ConnectDB.IsEnabled = false;
+            btn_CreateTable.IsEnabled = false;
+            btn_DlXML.IsEnabled = false;
+            btn_CompareZipFiles.IsEnabled = false;
 
             #region ----NOTES----
             //Hashtable resourceEntries = new Hashtable();
@@ -226,8 +230,7 @@ namespace Citi_Bike_Data_02.UI
 
         private void btn_DLZIPFiles_Click(object sender, RoutedEventArgs e)
         {
-            //Helper.HelperDB.CleanDB();
-
+            Helper.HelperDB.DeleteRows();
             string path; // = Environment.CurrentDirectory + "\\" + name;
             List<string> files = new List<string>();
             List<string> CSVData = new List<string>();
@@ -252,18 +255,16 @@ namespace Citi_Bike_Data_02.UI
                 {
                     int num = Helper.HelperDB.GetLastTableID(Properties.Resources.TableTrips);
 
-                    //Convert csv to datatable
-                    DataTable dt = Helper.HelperZIP.CreateDataTableFromCSV(Environment.CurrentDirectory + "\\" + files[i],
-                        num + 1, DBSchema);
+                    DataTable dt = Helper.HelperZIP.CreateDataTableFromCSV(Environment.CurrentDirectory + "\\" + files[i], num + 1, DBSchema); //Convert csv to datatable
 
-                    // populate db with datatable
-                    Helper.HelperDB.AddDataTableToDBTable(Properties.Resources.TableTrips, dt);
+                    Helper.HelperDB.AddDataTableToDBTable(Properties.Resources.TableTrips, dt); // populate db with datatable
 
                     // add csv file name to CSV file Table
 
-                    Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, files[i]); // delete CSV file
+                    Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, files[i]);        // delete CSV file
                 }
-                Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, ZIPName); // delete ZIP file
+                Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, ZIPName);             // delete ZIP file
+                Helper.HelperDB.ShrinkLogs();
             }
         }
 
@@ -364,44 +365,45 @@ namespace Citi_Bike_Data_02.UI
         /// <returns>List of ZIP File names in the DB. If list.count = 0, there are no file names in the DB</returns>
         private Dictionary<int, string> GetZIPFileNamesFromDB()
         {
-            string connectionString = @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf; Integrated Security = True";
-            //using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringDebug))   // create a connection
-            using (SqlConnection conn = new SqlConnection(connectionString))   // create a connection
+            //string connectionString = @"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename = C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf; Integrated Security = True";
+            //using (SqlConnection conn = new SqlConnection(connectionString))   // create a connection
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))   // create a connection
             {
                 Dictionary<int, string> zipFileNamesDB = new Dictionary<int, string>();
                 try
                 {
                     lbl_Status_01.Content = "Reading DB ZIP File Names";
                     string sql = "select * from " + Properties.Resources.TableZIPFileName;      // create query string
-                    conn.Open();                                                                // open connection to db
-                    SqlCommand sqlCommand = new SqlCommand(sql, conn);                          // sql command
-                    using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                    if (conn.State != ConnectionState.Open)
+                        conn.Open();                                                                // open connection to db
+
+                    using (SqlCommand sqlCommand = new SqlCommand(sql, conn))                          // sql command
                     {
-
-                        Debug.Print(reader.FieldCount.ToString());
-                        lbl_Status_01.Content = "Number of ZIP File Names in DB: " + reader.FieldCount.ToString();
-
-                        if (reader.HasRows)                                                         // if there is data
+                        using (SqlDataReader reader = sqlCommand.ExecuteReader())
                         {
-                            while (reader.Read())
+                            Debug.Print(reader.FieldCount.ToString());
+                            lbl_Status_01.Content = "Number of ZIP File Names in DB: " + reader.FieldCount.ToString();
+
+                            if (reader.HasRows)                                                         // if there is data
                             {
-                                Debug.Print(reader["ZIPFileName"].ToString());
-                                zipFileNamesDB.Add(Convert.ToInt32(reader["Id"]), reader["ZIPFileName"].ToString());
+                                while (reader.Read())
+                                {
+                                    Debug.Print(reader["ZIPFileName"].ToString());
+                                    zipFileNamesDB.Add(Convert.ToInt32(reader["Id"]), reader["ZIPFileName"].ToString());
+                                }
                             }
+                            reader.Close();
                         }
-                        reader.Close();
                     }
-                    conn.Close();
                 }
                 catch (Exception ex)
                 {
-                    Debug.Print("Cannot read ZIP File names from DB" +
-                                            Environment.NewLine + ex.Message);
-                    lbl_Status_01.Content = "Cannot read ZIP File names from DB" +
-                                            Environment.NewLine + ex.Message;
+                    Debug.Print("Cannot read ZIP File names from DB" + Environment.NewLine + ex.Message);
+                    lbl_Status_01.Content = "Cannot read ZIP File names from DB" + Environment.NewLine + ex.Message;
                 }
                 if (zipFileNamesDB.Count > 0)
                     ZIPFileNamesDB = zipFileNamesDB;
+                conn.Close();
                 return zipFileNamesDB;
             }
         }
