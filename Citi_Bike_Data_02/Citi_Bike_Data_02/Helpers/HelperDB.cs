@@ -578,7 +578,7 @@ namespace Citi_Bike_Data_02.Helper
         public static void ShrinkDB()
         {
             Debug.Print("SHRINKING DB SIZE");
-            string[] dirs = Directory.GetFiles(Environment.CurrentDirectory, "DB_Tests_01.mdf");
+            string[] dirs = Directory.GetFiles(Environment.CurrentDirectory, Properties.Resources.DBName + ".mdf");
 
             if (dirs.Length == 0) return;
 
