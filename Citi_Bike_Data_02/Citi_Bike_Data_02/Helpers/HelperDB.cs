@@ -35,10 +35,12 @@ namespace Citi_Bike_Data_02.Helper
      * Maximum DB Sizes: https://stackoverflow.com/questions/759244/sql-server-the-maximum-number-of-rows-in-table
      */
 
+    
     static class HelperDB
     {
         static string DBFilePath;
         static string DBConnectionString;
+        //string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
 
         /// <summary>
         /// Create a new DB in the location of the executing assembly
@@ -210,22 +212,27 @@ namespace Citi_Bike_Data_02.Helper
         public static string FindDBLocation()
         {
             //https://stackoverflow.com/questions/8146207/how-to-get-current-connected-database-file-path
-            SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionStringBase);          // create a base connection
-            SqlCommand GetDataFile = new SqlCommand();
-            GetDataFile.Connection = conn;
-            GetDataFile.CommandText = "SELECT physical_name FROM sys.database_files WHERE type = 0";
-            try
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))          // create a base connection
             {
-                conn.Open();
-                string DBFile = (string)GetDataFile.ExecuteScalar();                                    // get db file location
-                conn.Close();
-                Debug.Print("DB Location: " + DBFile);
-                return DBFile;
-            }
-            catch (Exception ex)
-            {
-                Debug.Print(ex.Message);
-                conn.Dispose();
+                using (SqlCommand GetDataFile = new SqlCommand())
+                {
+                    GetDataFile.Connection = conn;
+                    GetDataFile.CommandText = "SELECT physical_name FROM sys.database_files WHERE type = 0";
+                    try
+                    {
+                        if(conn.State != ConnectionState.Open)
+                            conn.Open();
+                        string DBFile = (string)GetDataFile.ExecuteScalar();                                    // get db file location
+                        conn.Close();
+                        Debug.Print("DB Location: " + DBFile);
+                        return DBFile;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Print(ex.Message);
+                        conn.Dispose();
+                    }
+                }
             }
             return null;
         }
@@ -247,21 +254,23 @@ namespace Citi_Bike_Data_02.Helper
                 try
                 {
                     string command = "SELECT CASE WHEN OBJECT_ID('" + DBName + "." + TableName + "' , 'U') IS NOT NULL THEN 1 ELSE 0 END";     // create query string to check if table exists
-                    SqlCommand TableCheck = new SqlCommand(command, conn);                      // create query command to check if table exists
-
-                    int x = Convert.ToInt32(TableCheck.ExecuteScalar());                        // execute query
-                    conn.Close();                                                               // close connection
-
-                    if (x == 1)
+                    using (SqlCommand TableCheck = new SqlCommand(command, conn))                      // create query command to check if table exists
                     {
-                        Debug.Print("Table exists: " + TableName);
-                        return true;
+                        int x = Convert.ToInt32(TableCheck.ExecuteScalar());                        // execute query
+                        conn.Close();                                                               // close connection
+
+                        if (x == 1)
+                        {
+                            Debug.Print("Table exists: " + TableName);
+                            return true;
+                        }
+                        else
+                        {
+                            Debug.Print("Table doesn't exist: " + TableName);
+                            return false;
+                        }
                     }
-                    else
-                    {
-                        Debug.Print("Table doesn't exist: " + TableName);
-                        return false;
-                    }
+   
                 }
                 catch (Exception ex)
                 {
@@ -354,7 +363,7 @@ namespace Citi_Bike_Data_02.Helper
             {
                 try
                 {
-                    if (conn.State != System.Data.ConnectionState.Open)                         // check if it's open
+                    if (conn.State != ConnectionState.Open)                         // check if it's open
                         conn.Open();
                     DataTable schema = conn.GetSchema("Tables");
                     return schema.Rows.Count;
@@ -392,28 +401,33 @@ namespace Citi_Bike_Data_02.Helper
         {
             Debug.Print("GETTING DB TABLE: " + TableName + " SCHEMA");
             Dictionary<string, Type> TableSchema = new Dictionary<string, Type>();
-            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
-            SqlConnection conn = new SqlConnection(connectionString);
-            string commandText = "SELECT * FROM " + TableName;
-            SqlCommand command = new SqlCommand(commandText, conn);
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
+            {
+                string commandText = "SELECT * FROM " + TableName;
+                using (SqlCommand command = new SqlCommand(commandText, conn))
+                {
+                    try
+                    {
+                        if (conn.State != ConnectionState.Open)
+                            conn.Open();
 
-            try
-            {
-                conn.Open();
-                SqlDataReader reader = command.ExecuteReader();
-
-                for (int i = 0; i < reader.VisibleFieldCount; i++)
-                    TableSchema.Add(reader.GetName(i), reader.GetFieldType(i));
-            }
-            catch (Exception ex)
-            {
-                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
-                return null;
-            }
-            finally
-            {
-                if (conn.State == ConnectionState.Open)
-                    conn.Close();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            for (int i = 0; i < reader.VisibleFieldCount; i++)
+                                TableSchema.Add(reader.GetName(i), reader.GetFieldType(i));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+                        return null;
+                    }
+                    finally
+                    {
+                        if (conn.State == ConnectionState.Open)
+                            conn.Close();
+                    }
+                }
             }
             return TableSchema;
         }
@@ -426,28 +440,33 @@ namespace Citi_Bike_Data_02.Helper
         /// <returns></returns>
         public static DataTable GetDBTable(string TableName)
         {
-            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
-            SqlConnection conn = new SqlConnection(connectionString);
-            string commandText = "SELECT * FROM " + TableName;
-            SqlCommand command = new SqlCommand(commandText, conn);
             DataTable dt = new DataTable();
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
+            {
+                string commandText = "SELECT * FROM " + TableName;
+                using (SqlCommand command = new SqlCommand(commandText, conn))
+                {
+                    try
+                    {
+                        if (conn.State != ConnectionState.Open)
+                            conn.Open();
 
-            try
-            {
-                conn.Open();
-
-                SqlDataAdapter adapter = new SqlDataAdapter(command);
-                adapter.Fill(dt);
-            }
-            catch (Exception ex)
-            {
-                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
-                return null;
-            }
-            finally
-            {
-                if (conn.State == ConnectionState.Open)
-                    conn.Close();
+                        using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                        {
+                            adapter.Fill(dt);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+                        return null;
+                    }
+                    finally
+                    {
+                        if (conn.State == ConnectionState.Open)
+                            conn.Close();
+                    }
+                }
             }
             return dt;
         }
@@ -460,25 +479,27 @@ namespace Citi_Bike_Data_02.Helper
         public static void AddDataTableToDBTable(string TableName, DataTable dataTable)
         {
             Debug.Print("ADDING DATATABLE: " + dataTable.TableName + " INTO DB TABLE: " + TableName);
-            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
-            SqlConnection conn = new SqlConnection(connectionString);
-            try
+            //string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
             {
-                conn.Open();
-                using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
+                try
                 {
-                    //foreach (DataColumn col in dataTable.Columns)
-                       // bulkCopy.ColumnMappings.Add(col.ColumnName, col.ColumnName);        // copy the column mapping
-                    bulkCopy.DestinationTableName = TableName;                              // set destination
-                    bulkCopy.WriteToServer(dataTable);                                      // write to DB
+                    conn.Open();
+                    using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
+                    {
+                        //foreach (DataColumn col in dataTable.Columns)
+                        // bulkCopy.ColumnMappings.Add(col.ColumnName, col.ColumnName);        // copy the column mapping
+                        bulkCopy.DestinationTableName = TableName;                              // set destination
+                        bulkCopy.WriteToServer(dataTable);                                      // write to DB
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+                }
+                if (conn.State == ConnectionState.Open)
+                    conn.Close();
             }
-            catch (Exception ex)
-            {
-                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
-            }
-            if (conn.State == ConnectionState.Open)
-                conn.Close();
         }
 
         /// <summary>
@@ -489,57 +510,129 @@ namespace Citi_Bike_Data_02.Helper
         public static int GetLastTableID(string TableName)
         {
             Debug.Print("GETTING LAST UNIQUE ID FROM TABLE: " + TableName);
-            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
-            SqlConnection conn = new SqlConnection(connectionString);
-            string commandText = "SELECT MAX (Id) FROM " + TableName;           // select max Id from table
-            SqlCommand command = new SqlCommand(commandText, conn);
             int num = -1;                                                       // default -1 value
-
-            try
+            //string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
             {
-                conn.Open();
-                var obj = command.ExecuteScalar();
-                if (obj == System.DBNull.Value)                                 // if the return value is null
-                    num = 0;                                                    // return 0
-                else
-                    num = Convert.ToInt32(obj);                                 // convert value to int
-            }
-            catch (Exception ex)
-            {
-                Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
-            }
-            if (conn.State == ConnectionState.Open)
-                conn.Close();
+                string commandText = "SELECT MAX (Id) FROM " + TableName;           // select max Id from table
+                using (SqlCommand command = new SqlCommand(commandText, conn))
+                {
+                    try
+                    {
+                        if (conn.State != ConnectionState.Open)
+                            conn.Open();
 
+                        var obj = command.ExecuteScalar();
+                        if (obj == System.DBNull.Value)                                 // if the return value is null
+                            num = 0;                                                    // return 0
+                        else
+                            num = Convert.ToInt32(obj);                                 // convert value to int
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Print(ex.Message + Environment.NewLine + ex.StackTrace.ToString());
+                    }
+                    if (conn.State == ConnectionState.Open)
+                        conn.Close();
+                }
+            }
             Debug.Print(num.ToString() + " ENTERIES IN TABLE: " + TableName);
 
             return num;
         }
 
 
-        public static void CleanDB()
+        public static void DeleteRows()
         {
-            string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
-            SqlConnection conn = new SqlConnection(connectionString);
-            conn.Open();
+            //string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
+            {
+                conn.Open();
 
-            string sql = @"DELETE FROM Trips;";
-            SqlCommand cmd = new SqlCommand(sql, conn);
-            cmd.ExecuteNonQuery();
+                string sql = @"DELETE FROM Trips;";
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    int numRows = cmd.ExecuteNonQuery();
 
-            sql = "ALTER DATABASE CitiBikeData SET RECOVERY SIMPLE;";
-            cmd = new SqlCommand(sql, conn);
-            cmd.ExecuteNonQuery();
+                    //sql = "ALTER DATABASE CitiBikeData SET RECOVERY SIMPLE;";
+                    //cmd = new SqlCommand(sql, conn);
+                    //cmd.ExecuteNonQuery();
 
-            sql = "DBCC SHRINKDATABASE (CitiBikeData, 10);";
-            cmd = new SqlCommand(sql, conn);
-            cmd.ExecuteNonQuery();
+                    //sql = "DBCC SHRINKDATABASE (CitiBikeData, 10);";
+                    //cmd = new SqlCommand(sql, conn);
+                    //cmd.ExecuteNonQuery();
 
-            sql = "DBCC SHRINKDATAFILE (CitiBikeData.ldf, 10);";
-            cmd = new SqlCommand(sql, conn);
-            cmd.ExecuteNonQuery();
+                    //sql = "DBCC SHRINKDATAFILE (CitiBikeData.ldf, 10);";
+                    //cmd = new SqlCommand(sql, conn);
+                    //cmd.ExecuteNonQuery();
 
-            conn.Close();
+                    conn.Close();
+                    Debug.Print("Number of rows deleted: " + numRows);
+                }
+            }
         }
+
+        // https://social.msdn.microsoft.com/Forums/en-US/313fbd12-ee1f-4e34-b9c1-aeb4816b6060/dbcc-shrinkdatabase-truncateonly?forum=sqldatabaseengine
+        public static void ShrinkDB()
+        {
+            Debug.Print("SHRINKING DB SIZE");
+            string[] dirs = Directory.GetFiles(Environment.CurrentDirectory, "DB_Tests_01.mdf");
+
+            if (dirs.Length == 0) return;
+
+            long length = new System.IO.FileInfo(dirs[0]).Length;
+            Debug.Print("Current DB Size: " + (double)(length / 1024f));
+
+            string connectionString = Properties.Resources.ConnectionString;
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                if (conn.State == ConnectionState.Open)
+                    conn.Close();
+
+                conn.Open();
+                //string sql = @"DBCC SHRINKDATABASE ('DB_Tests_01.mdf', 10, TRUNCATEONLY)";
+                string sql = @"DBCC SHRINKFILE('" + Properties.Resources.DBName + "', 10)";
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.CommandTimeout = 0;
+                    cmd.ExecuteNonQuery();
+
+                    conn.Close();
+                }
+            }
+
+            length = new System.IO.FileInfo(dirs[0]).Length;
+            Debug.Print("Current DB Size: " + (double)(length / 1024f));
+        }
+
+        public static void ShrinkLogs()
+        {
+            Debug.Print("SHRINKING LOG SIZE");
+            string[] dirs = Directory.GetFiles(Environment.CurrentDirectory, Properties.Resources.DBName + "_log.ldf");
+            if (dirs.Length == 0) return;
+            long length = new System.IO.FileInfo(dirs[0]).Length;
+            Debug.Print("Current Log Size: " + (double)(length / 1024f));
+
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
+            {
+                if (conn.State == ConnectionState.Open)
+                    conn.Close();
+
+                conn.Open();
+                string sql = @"DBCC SHRINKFILE('" + Properties.Resources.DBName + "_log', 10)";
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.CommandTimeout = 0;
+                    cmd.ExecuteNonQuery();
+                    conn.Close();
+                }
+            }
+
+            length = new System.IO.FileInfo(dirs[0]).Length;
+            Debug.Print("Current Log Size: " + (double)(length / 1024f));
+        }
+
+
     }           // close class
 }               // close namespace
