@@ -232,7 +232,7 @@ namespace Citi_Bike_Data_02.UI
         {
             Helper.HelperDB.DeleteRows();
             Helper.HelperDB.ShrinkDB();
-             Helper.HelperDB.ShrinkLogs();
+            Helper.HelperDB.ShrinkLogs();
 
             List<string> files = new List<string>();
             List<string> CSVData = new List<string>();
