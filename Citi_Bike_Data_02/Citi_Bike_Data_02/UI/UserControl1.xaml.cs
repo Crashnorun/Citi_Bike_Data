@@ -266,9 +266,7 @@ namespace Citi_Bike_Data_02.UI
                 Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, ZIPName);             // delete ZIP file
                 Helper.HelperDB.ShrinkLogs();
             }
-
-            //add stations to db
-            Helper.HelperDB.AddStationsToDB(Stations);
+            Helper.HelperDB.AddStationsToDB(Stations);                                          //add stations to db
         }
 
         private void btn_GetSchema_Click(object sender, RoutedEventArgs e)
