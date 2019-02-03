@@ -256,13 +256,17 @@ namespace Citi_Bike_Data_02.UI
 
                     Helper.HelperDB.AddDataTableToDBTable(Properties.Resources.TableTrips, dt); // populate db with datatable
 
-                    // add csv file name to CSV file Table
+                    Helper.HelperDB.AddCSVFileNameToDB(ZIPName, System.IO.Path.GetFileNameWithoutExtension(files[i]));  //add csv file name to CSV file Table
 
                     Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, files[i]);        // delete CSV file
                 }
                 Helper.HelperZIP.DeleteFile(Environment.CurrentDirectory, ZIPName);             // delete ZIP file
                 Helper.HelperDB.ShrinkLogs();
             }
+
+            //TO DO add stations to db.
+           
+
         }
 
         private void btn_GetSchema_Click(object sender, RoutedEventArgs e)

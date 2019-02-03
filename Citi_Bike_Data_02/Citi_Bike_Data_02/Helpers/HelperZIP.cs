@@ -142,10 +142,7 @@ namespace Citi_Bike_Data_02.Helper
             Debug.Print("CONVERTING CSV: " + FilePath + " INTO DATATABLE");
 
             string fileName = Path.GetFileNameWithoutExtension(FilePath);                       // get the file name
-            DataTable dt = new DataTable(fileName);                                             // create new data table
-
-            foreach (string key in DBSchema.Keys)
-                dt.Columns.Add(key, DBSchema[key]);                                             // create columns in dt from db
+            DataTable dt = CreateDatatableFromSchema(DBSchema, fileName);                       // create new data table
 
             List<string> csvFile = new List<string>();
             csvFile = ReadCSVFile(FilePath);                                                    // get csv data
@@ -158,6 +155,8 @@ namespace Citi_Bike_Data_02.Helper
             {
                 DataRow dr = dt.NewRow();                                                       // will hold the ordered data
                 List<string> trip = csvFile[i].Replace("\"", "").Split(',').ToList();           // remove quotes, split row into columns
+
+                AddStationToList(trip, headerRow, ref Stations);                                // add unique stations to list 
 
                 foreach (DataColumn col in dt.Columns)
                 {
@@ -216,6 +215,63 @@ namespace Citi_Bike_Data_02.Helper
             foreach (string key in Schema.Keys)
                 dt.Columns.Add(key, Schema[key]);                                               // create columns in dt from db
             return dt;
+        }
+
+        /// <summary>
+        /// Extract start and end stations from the TRIP.
+        /// Add start and end stations to the list of Stations if they do not exsits 
+        /// </summary>
+        /// <param name="Trip">List of strings identifying a trip</param>
+        /// <param name="HeaderRow">Header row from CSV file</param>
+        /// <param name="Stations">List of unique stations</param>
+        public static void AddStationToList(List<string> Trip, List<string> HeaderRow, ref List<cls_Station> Stations)
+        {
+            cls_Station StartStation = new cls_Station();
+            cls_Station EndStation = new cls_Station();
+
+            for (int i = 0; i < Trip.Count; i++)                    // extract start and end stations from trip
+            {
+                int tempNum = -1;
+                switch (HeaderRow[i].ToLower())
+                {
+                    case "startstationid":
+                        int.TryParse(Trip[i], out tempNum);
+                        StartStation.StationID = tempNum;
+                        break;
+                    case "startstationname":
+                        StartStation.StationName = Trip[i];
+                        break;
+                    case "startstationlatitude":
+                        if (Trip[i].ToUpper() == "NULL") StartStation.StationLatitude = 0;
+                        else StartStation.StationLatitude = Convert.ToDouble(Trip[i]);
+                        break;
+                    case "startstationlongitude":
+                        if (Trip[i].ToUpper() == "NULL") StartStation.StationLongitude = 0;
+                        else StartStation.StationLongitude = Convert.ToDouble(Trip[i]);
+                        break;
+                    case "endstationid":
+                        int.TryParse(Trip[i], out tempNum);
+                        EndStation.StationID = tempNum;
+                        break;
+                    case "endstationname":
+                        EndStation.StationName = Trip[i];
+                        break;
+                    case "endstationlatitude":
+                        if (Trip[i].ToUpper() == "NULL") EndStation.StationLatitude = 0;
+                        else EndStation.StationLatitude = Convert.ToDouble(Trip[i]);
+                        break;
+                    case "endstationlongitude":
+                        if (Trip[i].ToUpper() == "NULL") EndStation.StationLongitude = 0;
+                        else EndStation.StationLongitude = Convert.ToDouble(Trip[i]);
+                        break;
+                }
+            }
+
+            if (Stations.FindIndex(x => x.StationID == StartStation.StationID) == -1)
+                Stations.Add(StartStation);                                 // add start station
+
+            if (Stations.FindIndex(x => x.StationID == EndStation.StationID) == -1)
+                Stations.Add(EndStation);                                   // add end station
         }
 
 

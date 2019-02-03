@@ -10,6 +10,7 @@ using System.IO;
 using System.Data;
 using System.Collections;
 using System.Resources;
+using Citi_Bike_Data_01.Classes;
 
 namespace Citi_Bike_Data_02.Helper
 {
@@ -37,13 +38,13 @@ namespace Citi_Bike_Data_02.Helper
      * Maximum DB Sizes: https://stackoverflow.com/questions/759244/sql-server-the-maximum-number-of-rows-in-table
      */
 
-    
+
     static class HelperDB
     {
         static string DBFilePath;
         static string DBConnectionString;
         //string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
-
+        #region ----HOLD----
         /// <summary>
         /// Create a new DB in the location of the executing assembly
         /// </summary>
@@ -100,7 +101,6 @@ namespace Citi_Bike_Data_02.Helper
             return connectionString;
         }
 
-
         public static void CreateNewTable(string TableName, string ConnectionString, Dictionary<string, Type> ColumnNames, ref string message)
         {
             using (SqlConnection conn = new SqlConnection(ConnectionString))
@@ -138,7 +138,6 @@ namespace Citi_Bike_Data_02.Helper
             }
         }
 
-
         /// <summary>
         /// Find the executing assembly folder path 
         /// </summary>
@@ -152,7 +151,6 @@ namespace Citi_Bike_Data_02.Helper
             return localPath;
             //C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\bin\Debug
         }
-
 
         /// <summary>
         /// Check if the DB exists at executing assembly
@@ -222,7 +220,7 @@ namespace Citi_Bike_Data_02.Helper
                     GetDataFile.CommandText = "SELECT physical_name FROM sys.database_files WHERE type = 0";
                     try
                     {
-                        if(conn.State != ConnectionState.Open)
+                        if (conn.State != ConnectionState.Open)
                             conn.Open();
                         string DBFile = (string)GetDataFile.ExecuteScalar();                                    // get db file location
                         conn.Close();
@@ -238,7 +236,6 @@ namespace Citi_Bike_Data_02.Helper
             }
             return null;
         }
-
 
         /// <summary>
         /// Check if a table exists in a DB
@@ -272,7 +269,7 @@ namespace Citi_Bike_Data_02.Helper
                             return false;
                         }
                     }
-   
+
                 }
                 catch (Exception ex)
                 {
@@ -379,7 +376,7 @@ namespace Citi_Bike_Data_02.Helper
             }
             return 0;
         }
-
+        #endregion
 
         /// <summary>
         /// Add a value to the resoureces file
@@ -543,7 +540,56 @@ namespace Citi_Bike_Data_02.Helper
             return num;
         }
 
+        public static void AddCSVFileNameToDB(string ZipFileName, string CSVFileName)
+        {
+            DataTable dt = GetDBTable("CSVFileName");
+            DataRow dr = dt.NewRow();
+            dr[0] = GetLastTableID("CSVFileName") + 1;
+            dr[1] = CSVFileName;
+            dr[2] = ZipFileName;
 
+            using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
+            {
+                string cmdString = "INSERT INTO CSVFileName (id, CSVFileName, ZIPFileName) VALUES (@val1, @val2, @val3)";
+                using (SqlCommand cmd = new SqlCommand(cmdString, conn))
+                {
+                    cmd.Parameters.AddWithValue("@val1", GetLastTableID("CSVFileName") + 1);
+                    cmd.Parameters.AddWithValue("@val2", CSVFileName);
+                    cmd.Parameters.AddWithValue("@val3", ZipFileName);
+
+                    try
+                    {
+                        if (conn.State != ConnectionState.Open)
+                            conn.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Print(ex.Message);
+                    }
+                }
+                conn.Close();
+            }
+        }
+
+        public static void AddStationsToDB(List<cls_Station> Stations)
+        {
+            Dictionary<string, Type> Schema = GetTableSchema("StationTable");
+            DataTable dt = HelperZIP.CreateDatatableFromSchema(Schema, "StationTable");
+
+            for (int i = 0; i < Stations.Count; i++)
+            {
+                DataRow dr = dt.NewRow();
+                dr["StationID"] = Stations[i].StationID;
+                dr["StationName"] = Stations[i].StationName;
+                dr["StationLatitude"] = Stations[i].StationLatitude;
+                dr["StationLongitude"] = Stations[i].StationLongitude;
+            }
+
+            AddDataTableToDBTable("CSVFileName", dt);
+        }
+
+        #region ----DB CLEANUP----
         public static void DeleteRows()
         {
             //string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
@@ -634,7 +680,7 @@ namespace Citi_Bike_Data_02.Helper
             length = new System.IO.FileInfo(dirs[0]).Length;
             Debug.Print("Current Log Size: " + (double)(length / 1024f));
         }
-
+        #endregion
 
     }           // close class
 }               // close namespace
