@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.IO;
 using System.Data;
+using Citi_Bike_Data_01.Classes;
 
 namespace Citi_Bike_Data_02.Helper
 {
@@ -136,11 +137,9 @@ namespace Citi_Bike_Data_02.Helper
         /// <param name="FilePath">File path where the csv file is saved</param>
         /// <param name="StartingUniqueId"></param>
         /// <returns>DataTable from the CSV file</returns>
-        public static DataTable CreateDataTableFromCSV(string FilePath, int StartingUniqueId, Dictionary<string,Type> DBSchema)
+        public static DataTable CreateDataTableFromCSV(string FilePath, int StartingUniqueId, Dictionary<string, Type> DBSchema, ref List<cls_Station> Stations)
         {
             Debug.Print("CONVERTING CSV: " + FilePath + " INTO DATATABLE");
-            //Dictionary<string, Type> DBSchema = new Dictionary<string, Type>();
-            //DBSchema = HelperDB.GetTableSchema(Properties.Resources.TableTrips);                // get the db table schema
 
             string fileName = Path.GetFileNameWithoutExtension(FilePath);                       // get the file name
             DataTable dt = new DataTable(fileName);                                             // create new data table
@@ -190,15 +189,15 @@ namespace Citi_Bike_Data_02.Helper
                                     else
                                         dr[col.ColumnName] = Convert.ToDateTime(trip[index]);
                                     break;
-                                case "startstationlatitude":
-                                case "startstationlongitude":
-                                case "endstationlatitude":
-                                case "endstationlongitude":
-                                    if (trip[index].ToUpper() == "NULL")
-                                        dr[col.ColumnName] = -1;
-                                    else
-                                        dr[col.ColumnName] = Convert.ToDouble(trip[index]);
-                                    break;
+                                //case "startstationlatitude":
+                                //case "startstationlongitude":
+                                //case "endstationlatitude":
+                                //case "endstationlongitude":
+                                //if (trip[index].ToUpper() == "NULL")
+                                //    dr[col.ColumnName] = -1;
+                                //else
+                                //    dr[col.ColumnName] = Convert.ToDouble(trip[index]);
+                                //break;
                                 default:
                                     dr[col.ColumnName] = trip[index];
                                     break;
@@ -210,6 +209,15 @@ namespace Citi_Bike_Data_02.Helper
             }
             return dt;
         }
+
+        public static DataTable CreateDatatableFromSchema(Dictionary<string, Type> Schema, string TableName)
+        {
+            DataTable dt = new DataTable(TableName);                                            // create new data table
+            foreach (string key in Schema.Keys)
+                dt.Columns.Add(key, Schema[key]);                                               // create columns in dt from db
+            return dt;
+        }
+
 
         /// <summary>
         /// Extract the date from the CSV file name to a DateTime

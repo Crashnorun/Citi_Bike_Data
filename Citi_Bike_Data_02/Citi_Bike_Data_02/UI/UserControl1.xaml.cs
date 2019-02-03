@@ -23,6 +23,8 @@ using System.Resources;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Collections;
+using Citi_Bike_Data_01.Classes;
+
 
 namespace Citi_Bike_Data_02.UI
 {
@@ -31,18 +33,15 @@ namespace Citi_Bike_Data_02.UI
     {
 
         #region ----PROPERTIES----
-
         public XDocument XMLDocument;
         public List<string> ZIPFileNamesOnline = new List<string>();
         public Dictionary<int, string> ZIPFileNamesDB;
-
+        public List<cls_Station> Stations = new List<cls_Station>();
         #endregion
-
 
         #region ----FIELDS----
 
         private string lblMessage = string.Empty;
-
 
         #endregion
 
@@ -167,13 +166,6 @@ namespace Citi_Bike_Data_02.UI
         }
 
 
-        //private IInvokeProvider Invoke(object sender, RoutedEventArgs e)
-        //{
-        //    var i = 100;
-        //    return null;
-        //}
-
-
         private void btn_CreateTable_Click(object sender, RoutedEventArgs e)
         {
             //ButtonAutomationPeer peer = new ButtonAutomationPeer(btn_ConnectDB);
@@ -260,7 +252,7 @@ namespace Citi_Bike_Data_02.UI
                 {
                     int num = Helper.HelperDB.GetLastTableID(Properties.Resources.TableTrips);
 
-                    DataTable dt = Helper.HelperZIP.CreateDataTableFromCSV(Environment.CurrentDirectory + "\\" + files[i], num + 1, DBSchema); //Convert csv to datatable
+                    DataTable dt = Helper.HelperZIP.CreateDataTableFromCSV(Environment.CurrentDirectory + "\\" + files[i], num + 1, DBSchema, ref Stations); //Convert csv to datatable
 
                     Helper.HelperDB.AddDataTableToDBTable(Properties.Resources.TableTrips, dt); // populate db with datatable
 
