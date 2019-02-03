@@ -230,7 +230,10 @@ namespace Citi_Bike_Data_02.UI
 
         private void btn_DLZIPFiles_Click(object sender, RoutedEventArgs e)
         {
-            string path; // = Environment.CurrentDirectory + "\\" + name;
+            Helper.HelperDB.DeleteRows();
+            Helper.HelperDB.ShrinkDB();
+             Helper.HelperDB.ShrinkLogs();
+
             List<string> files = new List<string>();
             List<string> CSVData = new List<string>();
 
@@ -244,11 +247,14 @@ namespace Citi_Bike_Data_02.UI
 
             foreach (string ZIPName in ZIPFileNamesOnline)
             {
+                if (ZIPName == "201307-201402-citibike-tripdata.zip")
+                    continue;
+
                 if (!Helper.HelperZIP.DownloadZIPFile(ZIPName))                                 // download zip files
-                    break;
+                    continue;
 
                 if (!Helper.HelperZIP.UnZIPFile(ZIPName, out files))                            // unzip files
-                    break;
+                    continue;
 
                 for (int i = 0; i < files.Count; i++)
                 {
