@@ -222,7 +222,9 @@ namespace Citi_Bike_Data_02.UI
 
         private void btn_DLZIPFiles_Click(object sender, RoutedEventArgs e)
         {
-            Helper.HelperDB.DeleteRows();
+            Helper.HelperDB.DeleteRows("StationTable");
+            Helper.HelperDB.DeleteRows("Trips");
+            Helper.HelperDB.DeleteRows("CSVFileName");
             Helper.HelperDB.ShrinkDB();
             Helper.HelperDB.ShrinkLogs();
 
@@ -237,6 +239,7 @@ namespace Citi_Bike_Data_02.UI
             Dictionary<string, Type> DBSchema = new Dictionary<string, Type>();
             DBSchema = Helper.HelperDB.GetTableSchema(Properties.Resources.TableTrips);         // get the db table schema
 
+            ZIPFileNamesOnline.RemoveRange(2, ZIPFileNamesOnline.Count - 3);
             foreach (string ZIPName in ZIPFileNamesOnline)
             {
                 if (ZIPName == "201307-201402-citibike-tripdata.zip")
@@ -264,9 +267,8 @@ namespace Citi_Bike_Data_02.UI
                 Helper.HelperDB.ShrinkLogs();
             }
 
-            //TO DO add stations to db.
-           
-
+            //add stations to db
+            Helper.HelperDB.AddStationsToDB(Stations);
         }
 
         private void btn_GetSchema_Click(object sender, RoutedEventArgs e)

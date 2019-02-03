@@ -139,9 +139,8 @@ namespace Citi_Bike_Data_02.Helper
         /// <returns>DataTable from the CSV file</returns>
         public static DataTable CreateDataTableFromCSV(string FilePath, int StartingUniqueId, Dictionary<string, Type> DBSchema, ref List<cls_Station> Stations)
         {
-            Debug.Print("CONVERTING CSV: " + FilePath + " INTO DATATABLE");
-
             string fileName = Path.GetFileNameWithoutExtension(FilePath);                       // get the file name
+            Debug.Print("CONVERTING CSV: " + fileName + " INTO DATATABLE");
             DataTable dt = CreateDatatableFromSchema(DBSchema, fileName);                       // create new data table
 
             List<string> csvFile = new List<string>();

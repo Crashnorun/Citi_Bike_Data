@@ -576,28 +576,32 @@ namespace Citi_Bike_Data_02.Helper
         {
             Dictionary<string, Type> Schema = GetTableSchema("StationTable");
             DataTable dt = HelperZIP.CreateDatatableFromSchema(Schema, "StationTable");
+            int num = GetLastTableID("StationTable");
 
             for (int i = 0; i < Stations.Count; i++)
             {
                 DataRow dr = dt.NewRow();
+                dr["id"] = num;
                 dr["StationID"] = Stations[i].StationID;
                 dr["StationName"] = Stations[i].StationName;
                 dr["StationLatitude"] = Stations[i].StationLatitude;
                 dr["StationLongitude"] = Stations[i].StationLongitude;
+                dt.Rows.Add(dr);
+                num++;
             }
 
-            AddDataTableToDBTable("CSVFileName", dt);
+            AddDataTableToDBTable("StationTable", dt);
         }
 
         #region ----DB CLEANUP----
-        public static void DeleteRows()
+        public static void DeleteRows(string TableName)
         {
             //string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True";
             using (SqlConnection conn = new SqlConnection(Properties.Resources.ConnectionString))
             {
                 conn.Open();
 
-                string sql = @"DELETE FROM Trips;";
+                string sql = @"DELETE FROM " + TableName + ";";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     int numRows = cmd.ExecuteNonQuery();
