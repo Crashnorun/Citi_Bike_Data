@@ -13,7 +13,7 @@ namespace Citi_Bike_Data_01.Classes
     /// Station Latitude = Double
     /// Station Longitude = Double
     /// </summary>
-    public class cls_Station
+    public class cls_Station : IEquatable<cls_Station>
     {
         #region PROPERTIES
         public int StationID
@@ -21,7 +21,7 @@ namespace Citi_Bike_Data_01.Classes
             get { return stationID; }
             set { stationID = value; }
         }
-       
+
         public string StationName
         {
             get { return stationName; }
@@ -56,6 +56,19 @@ namespace Citi_Bike_Data_01.Classes
             this.stationName = stationName;
             this.stationLatitude = stationLatitude;
             this.stationLongitude = stationLongitude;
+        }
+
+        //public override bool Equals(object obj)
+        //{
+        //    cls_Station other = obj as cls_Station;
+        //    return (this.StationID == other.StationID && this.StationName == other.StationName &&
+        //      this.StationLatitude == other.StationLatitude && this.StationLongitude == other.StationLongitude);
+        //}
+
+        public bool Equals(cls_Station other)
+        {
+            return (this.StationID == other.StationID && this.StationName == other.StationName &&
+              this.StationLatitude == other.StationLatitude && this.StationLongitude == other.StationLongitude);
         }
     }
 }
