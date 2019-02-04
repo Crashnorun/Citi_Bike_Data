@@ -266,16 +266,15 @@ namespace Citi_Bike_Data_02.Helper
                 }
             }
 
-            if (Stations.FindIndex(x => x.StationLatitude == StartStation.StationLatitude && x.StationLongitude == StartStation.StationLongitude) == -1)
-                Stations.Add(StartStation);
+            //if (Stations.FindIndex(x => x.StationLatitude == StartStation.StationLatitude && x.StationLongitude == StartStation.StationLongitude) == -1)
+            //    Stations.Add(StartStation);
+            //if (Stations.FindIndex(x => x.StationLatitude == EndStation.StationLatitude && x.StationLongitude == EndStation.StationLongitude) == -1)
+            //    Stations.Add(EndStation);
 
-            if (Stations.FindIndex(x => x.StationLatitude == EndStation.StationLatitude && x.StationLongitude == EndStation.StationLongitude) == -1)
-                Stations.Add(EndStation);
-
-            //if (Stations.FindIndex(x => x.StationID == StartStation.StationID) == -1)
-            //    Stations.Add(StartStation);                                 // add start station
-            //if (Stations.FindIndex(x => x.StationID == EndStation.StationID) == -1)
-            //    Stations.Add(EndStation);                                   // add end station
+            if (Stations.FindIndex(x => x.StationID == StartStation.StationID) == -1)
+                Stations.Add(StartStation);                                 // add start station
+            if (Stations.FindIndex(x => x.StationID == EndStation.StationID) == -1)
+                Stations.Add(EndStation);                                   // add end station
         }
 
 
