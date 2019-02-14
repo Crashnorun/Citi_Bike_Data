@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.IO;
 using System.Data;
+using Citi_Bike_Data_01.Classes;
 
 namespace Citi_Bike_Data_02.Helper
 {
@@ -34,8 +35,9 @@ namespace Citi_Bike_Data_02.Helper
         /// <returns>TRUE = success, FALSE = failure</returns>
         public static bool DownloadZIPFile(string FileName)
         {
-            // Example url: https://s3.amazonaws.com/tripdata/201306-citibike-tripdata.zip
-            // construct url
+            Debug.Print("DOWNLOADING ZIP FILE: " + FileName);
+
+            // construct url, Example url: https://s3.amazonaws.com/tripdata/201306-citibike-tripdata.zip
             string url = Properties.Resources.URLXML + "/" + FileName;
             string path = Environment.CurrentDirectory + "\\" + FileName;
 
@@ -63,6 +65,7 @@ namespace Citi_Bike_Data_02.Helper
         /// <param name="FilePath">File path where document(s) saved</param>
         public static bool UnZIPFile(string FileName, out List<string> FilePaths)
         {
+            Debug.Print("EXTRACTING CSV FILES");
             string path = Environment.CurrentDirectory + "\\" + FileName;
             List<string> fileNames = new List<string>();
 
@@ -117,6 +120,7 @@ namespace Citi_Bike_Data_02.Helper
         /// <param name="fileName"></param>
         public static void DeleteFile(string DirectoryPath, string fileName)
         {
+            Debug.Print("DELETING FILE: " + fileName);
             try
             {
                 File.Delete(DirectoryPath + "\\" + fileName);
@@ -133,16 +137,11 @@ namespace Citi_Bike_Data_02.Helper
         /// <param name="FilePath">File path where the csv file is saved</param>
         /// <param name="StartingUniqueId"></param>
         /// <returns>DataTable from the CSV file</returns>
-        public static DataTable CreateDataTableFromCSV(string FilePath, int StartingUniqueId)
+        public static DataTable CreateDataTableFromCSV(string FilePath, int StartingUniqueId, Dictionary<string, Type> DBSchema, ref List<cls_Station> Stations)
         {
-            Dictionary<string, Type> DBSchema = new Dictionary<string, Type>();
-            DBSchema = HelperDB.GetTableSchema(Properties.Resources.TableTrips);                // get the db table schema
-
             string fileName = Path.GetFileNameWithoutExtension(FilePath);                       // get the file name
-            DataTable dt = new DataTable(fileName);                                             // create new data table
-
-            foreach (string key in DBSchema.Keys)
-                dt.Columns.Add(key, DBSchema[key]);                                             // create columns in dt from db
+            Debug.Print("CONVERTING CSV: " + fileName + " INTO DATATABLE");
+            DataTable dt = CreateDatatableFromSchema(DBSchema, fileName);                       // create new data table
 
             List<string> csvFile = new List<string>();
             csvFile = ReadCSVFile(FilePath);                                                    // get csv data
@@ -155,6 +154,8 @@ namespace Citi_Bike_Data_02.Helper
             {
                 DataRow dr = dt.NewRow();                                                       // will hold the ordered data
                 List<string> trip = csvFile[i].Replace("\"", "").Split(',').ToList();           // remove quotes, split row into columns
+
+                AddStationToList(trip, headerRow, ref Stations);                                // add unique stations to list 
 
                 foreach (DataColumn col in dt.Columns)
                 {
@@ -174,18 +175,27 @@ namespace Citi_Bike_Data_02.Helper
                                 case "endstationid":
                                 case "bikeid":
                                 case "gender":
-                                    dr[col.ColumnName] = Convert.ToInt32(trip[index]);
+                                    if (trip[index].ToUpper() == "NULL")
+                                        dr[col.ColumnName] = -1;                // insert -1 for nulls
+                                    else
+                                        dr[col.ColumnName] = Convert.ToInt32(trip[index]);
                                     break;
                                 case "starttime":
                                 case "stoptime":
-                                    dr[col.ColumnName] = Convert.ToDateTime(trip[index]);
+                                    if (trip[index].ToUpper() == "NULL")
+                                        dr[col.ColumnName] = new DateTime();
+                                    else
+                                        dr[col.ColumnName] = Convert.ToDateTime(trip[index]);
                                     break;
-                                case "startstationlatitude":
-                                case "startstationlongitude":
-                                case "endstationlatitude":
-                                case "endstationlongitude":
-                                    dr[col.ColumnName] = Convert.ToDouble(trip[index]);
-                                    break;
+                                //case "startstationlatitude":
+                                //case "startstationlongitude":
+                                //case "endstationlatitude":
+                                //case "endstationlongitude":
+                                //if (trip[index].ToUpper() == "NULL")
+                                //    dr[col.ColumnName] = -1;
+                                //else
+                                //    dr[col.ColumnName] = Convert.ToDouble(trip[index]);
+                                //break;
                                 default:
                                     dr[col.ColumnName] = trip[index];
                                     break;
@@ -197,6 +207,76 @@ namespace Citi_Bike_Data_02.Helper
             }
             return dt;
         }
+
+        public static DataTable CreateDatatableFromSchema(Dictionary<string, Type> Schema, string TableName)
+        {
+            DataTable dt = new DataTable(TableName);                                            // create new data table
+            foreach (string key in Schema.Keys)
+                dt.Columns.Add(key, Schema[key]);                                               // create columns in dt from db
+            return dt;
+        }
+
+        /// <summary>
+        /// Extract start and end stations from the TRIP.
+        /// Add start and end stations to the list of Stations if they do not exsits 
+        /// </summary>
+        /// <param name="Trip">List of strings identifying a trip</param>
+        /// <param name="HeaderRow">Header row from CSV file</param>
+        /// <param name="Stations">List of unique stations</param>
+        public static void AddStationToList(List<string> Trip, List<string> HeaderRow, ref List<cls_Station> Stations)
+        {
+            cls_Station StartStation = new cls_Station();
+            cls_Station EndStation = new cls_Station();
+
+            for (int i = 0; i < Trip.Count; i++)                    // extract start and end stations from trip
+            {
+                int tempNum = -1;
+                switch (HeaderRow[i].ToLower())
+                {
+                    case "startstationid":
+                        int.TryParse(Trip[i], out tempNum);
+                        StartStation.StationID = tempNum;
+                        break;
+                    case "startstationname":
+                        StartStation.StationName = Trip[i];
+                        break;
+                    case "startstationlatitude":
+                        if (Trip[i].ToUpper() == "NULL") StartStation.StationLatitude = 0;
+                        else StartStation.StationLatitude = Convert.ToDouble(Trip[i]);
+                        break;
+                    case "startstationlongitude":
+                        if (Trip[i].ToUpper() == "NULL") StartStation.StationLongitude = 0;
+                        else StartStation.StationLongitude = Convert.ToDouble(Trip[i]);
+                        break;
+                    case "endstationid":
+                        int.TryParse(Trip[i], out tempNum);
+                        EndStation.StationID = tempNum;
+                        break;
+                    case "endstationname":
+                        EndStation.StationName = Trip[i];
+                        break;
+                    case "endstationlatitude":
+                        if (Trip[i].ToUpper() == "NULL") EndStation.StationLatitude = 0;
+                        else EndStation.StationLatitude = Convert.ToDouble(Trip[i]);
+                        break;
+                    case "endstationlongitude":
+                        if (Trip[i].ToUpper() == "NULL") EndStation.StationLongitude = 0;
+                        else EndStation.StationLongitude = Convert.ToDouble(Trip[i]);
+                        break;
+                }
+            }
+
+            //if (Stations.FindIndex(x => x.StationLatitude == StartStation.StationLatitude && x.StationLongitude == StartStation.StationLongitude) == -1)
+            //    Stations.Add(StartStation);
+            //if (Stations.FindIndex(x => x.StationLatitude == EndStation.StationLatitude && x.StationLongitude == EndStation.StationLongitude) == -1)
+            //    Stations.Add(EndStation);
+
+            if (Stations.FindIndex(x => x.StationID == StartStation.StationID) == -1)
+                Stations.Add(StartStation);                                 // add start station
+            if (Stations.FindIndex(x => x.StationID == EndStation.StationID) == -1)
+                Stations.Add(EndStation);                                   // add end station
+        }
+
 
         /// <summary>
         /// Extract the date from the CSV file name to a DateTime

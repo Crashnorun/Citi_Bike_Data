@@ -123,14 +123,14 @@
   <data name="CitiBikeColorRGB" xml:space="preserve">
     <value>11,42,133</value>
   </data>
+  <data name="ConnectionString" xml:space="preserve">
+    <value>Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True;Connect Timeout=30</value>
+  </data>
   <data name="ConnectionStringBase" xml:space="preserve">
     <value>Data Source=(LocalDB)\MSSQLLocalDB; database=master; Integrated security=True;</value>
   </data>
   <data name="ConnectionStringDebug" xml:space="preserve">
     <value>Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\cportelli\Documents\Personal\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True;Connect Timeout=30</value>
-  </data>
-  <data name="ConnectionStringRelease" xml:space="preserve">
-    <value />
   </data>
   <data name="DBName" xml:space="preserve">
     <value>CitiBikeData</value>

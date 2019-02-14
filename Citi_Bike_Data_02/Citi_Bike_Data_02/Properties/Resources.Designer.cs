@@ -79,6 +79,15 @@ namespace Citi_Bike_Data_02.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Charlie\Documents\GitHub\Citi_Bike_Data\Citi_Bike_Data_02\Citi_Bike_Data_02\CitiBikeData.mdf;Integrated Security=True;Connect Timeout=30.
+        /// </summary>
+        internal static string ConnectionString {
+            get {
+                return ResourceManager.GetString("ConnectionString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Data Source=(LocalDB)\MSSQLLocalDB; database=master; Integrated security=True;.
         /// </summary>
         internal static string ConnectionStringBase {
@@ -93,15 +102,6 @@ namespace Citi_Bike_Data_02.Properties {
         internal static string ConnectionStringDebug {
             get {
                 return ResourceManager.GetString("ConnectionStringDebug", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to .
-        /// </summary>
-        internal static string ConnectionStringRelease {
-            get {
-                return ResourceManager.GetString("ConnectionStringRelease", resourceCulture);
             }
         }
         
