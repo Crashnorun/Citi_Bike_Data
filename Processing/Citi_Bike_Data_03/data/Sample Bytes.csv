@@ -1,0 +1,6 @@
+tripduration,starttime,stoptime,start station id,start station name,start station latitude,start station longitude,end station id,end station name,end station latitude,end station longitude,bikeid,usertype,birth year,gender
+634,7/1/2013 0:00,7/1/2013 0:10,164,E 47 St & 2 Ave,40.75323098,-73.97032517,504,1 Ave & E 15 St,40.73221853,-73.98165557,16950,Customer,\N,0
+1547,7/1/2013 0:00,7/1/2013 0:25,388,W 26 St & 10 Ave,40.74971775,-74.00295035,459,W 20 St & 11 Ave,40.746745,-74.007756,19816,Customer,\N,0
+178,7/1/2013 0:01,7/1/2013 0:04,293,Lafayette St & E 8 St,40.73028666,-73.9907647,237,E 11 St & 2 Ave,40.73047309,-73.98672378,14548,Subscriber,1980,2
+1580,7/1/2013 0:01,7/1/2013 0:27,531,Forsyth St & Broome St,40.71893904,-73.99266288,499,"Broadway & W 6
+",,,,,,
